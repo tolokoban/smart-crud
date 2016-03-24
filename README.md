@@ -12,7 +12,6 @@ classes:
     parent: Parent*
     teacher: Teacher
     $create: TEACHER
-    $request: *
     $update: TEACHER | PARENT
     $delete: TEACHER
   Parent:
@@ -20,11 +19,13 @@ classes:
     firstname: STRING
     lastname: STRING
     students: Student*
-      
+      $create: TEACHER | user == $user
+      $delete: TEACHER
   Teacher:
     user: User?
     firstname: STRING
     lastname: STRING
     students: Student*
+    $update: user == $user
 ```
 
