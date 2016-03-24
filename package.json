@@ -1,0 +1,30 @@
+{
+  "name": "smart-crud",
+  "version": "0.0.1",
+  "description": "Javascript (and eventually PHP) code generator for CRUD applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tolokoban/smart-crud.git"
+  },
+  "keywords": [
+    "CRUD",
+    "tolokoban"
+  ],
+  "author": "Tolokoban",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/tolokoban/smart-crud/issues"
+  },
+  "homepage": "https://github.com/tolokoban/smart-crud#readme",
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  },
+  "dependencies": {
+    "colors": "^1.1.2",
+    "readline-sync": "^1.4.1"
+  }
+}

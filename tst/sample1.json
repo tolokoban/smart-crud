@@ -1,0 +1,17 @@
+{
+    "Doctor": {
+        "name": "CHAR",
+        "visits": "Visit*"
+    },
+    "Patient": {
+        "name": "CHAR",
+        "age": "INT",
+        "gender": ["MALE", "FEMALE", "OTHER"]
+    },
+    "Visit": {
+        "patient": "Patient",
+        "doctor": "Doctor",
+        "date": "DATETIME",
+        "status": ["ASKED", "PROPOSED", "VALIDATED"]
+    }
+}
