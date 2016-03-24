@@ -27,5 +27,6 @@ classes:
     lastname: STRING
     students: Student*
     $update: user == $user
+    $delete: ADMIN
 ```
 
