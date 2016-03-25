@@ -1,17 +1,31 @@
 {
-    "Doctor": {
-        "name": "CHAR",
-        "visits": "Visit*"
-    },
-    "Patient": {
-        "name": "CHAR",
-        "age": "INT",
-        "gender": ["MALE", "FEMALE", "OTHER"]
-    },
-    "Visit": {
-        "patient": "Patient",
-        "doctor": "Doctor",
-        "date": "DATETIME",
-        "status": ["ASKED", "PROPOSED", "VALIDATED"]
+    "prefix": "test",
+    "data": {
+        "Tag": {
+            "name": "CHAR",
+            "issues": "Issue*"
+        },
+        "Issue": {
+            "title": "CHAR",
+            "content": "TEXT",
+            "author": "User",
+            "date": "DATETIME",
+            "comments": "#Comment.issue",
+            "votes": "#Vote:issue",
+            "tags": "Tag*",
+            "status": ["OPEN", "FIXED", "CLOSED"],
+            "type": ["BUG", "FEATURE"]
+        },
+        "Comment": {
+            "content": "TEXT",
+            "author": "User",
+            "date": "DATETIME",
+            "issue": "Issue"
+        },
+        "Vote": {
+            "user": "User",
+            "issue": "Issue",
+            "vote": "INT"
+        }
     }
 }

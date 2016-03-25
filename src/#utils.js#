@@ -48,6 +48,7 @@ exports.isBaseType = function( type ) {
     if( Array.isArray( type ) ) return true;
     switch( type ) {
     case 'CHAR': return true;
+    case 'BOOL': return true;
     case 'TEXT': return true;
     case 'FILE': return true;
     case 'INT': return true;

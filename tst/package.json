@@ -1,0 +1,26 @@
+{
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tolokoban/smart-crud.git"
+    },
+    "homepage": "https://github.com/tolokoban/smart-crud",
+    "bugs": {
+        "url": "https://github.com/tolokoban/smart-crud/issues"
+    },
+    "scripts": {
+        "test": "jasmine",
+        "test:dbg": "node --debug-brk node_modules/jasmine/bin/jasmine.js"
+    },
+    "name": "test",
+    "version": "1",
+    "author": "Tolokoban",
+    "description": "Test project for smart-crud",
+    "license": "GPL",
+    "tfw": {
+        "modules": [],
+        "compile": {
+            "type": "firefoxos",
+            "files": "\\.html$"
+        }
+    }
+}

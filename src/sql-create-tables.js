@@ -2,18 +2,15 @@ module.exports = function( tables ) {
     var output = '';
     var tableName, fields;
     var fieldName, fieldType;
-    var firstField;
     
     for( tableName in tables ) {
         fields = tables[tableName];
         output += "DROP TABLE IF EXISTS `" + tableName + "`;\n";
-        output += "CREATE TABLE `" + tableName + "` (";
-        firstField = true;
+        output += "CREATE TABLE `" + tableName + "` (\n";
+        output += "  `id` int(11) NOT NULL AUTO_INCREMENT";
         for( fieldName in fields ) {
             fieldType = convertTypeToSQL( fields[fieldName] );
-            if( firstField ) firstField = false;
-            else output += ',';
-            output += '\n  `' + fieldName + "` " + fieldType;
+            output += ',\n  `' + fieldName + "` " + fieldType;
         }
 
         output += "\n);\n\n";
@@ -37,6 +34,7 @@ function convertTypeToSQL( type ) {
     }
     switch( type ) {
     case 'INT': return 'INT';
+    case 'BOOL': return 'tinyint(1)';
     case 'FLOAT': return 'FLOAT';
     case 'CHAR': return 'VARCHAR(255)';
     case 'TEXT': return 'TEXT';

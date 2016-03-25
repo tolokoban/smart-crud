@@ -1,0 +1,7 @@
+<?php
+function isGranted( $inputs ) {
+    // @TODO Implement a security test.
+    error_log( 'Service [test.Patient.request] is unsecure!' );
+    return True;
+}
+?>
