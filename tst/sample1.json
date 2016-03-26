@@ -11,7 +11,7 @@
             "author": "User",
             "date": "DATETIME",
             "comments": "#Comment.issue",
-            "votes": "#Vote:issue",
+            "votes": "#Vote.issue",
             "tags": "Tag*",
             "status": ["OPEN", "FIXED", "CLOSED"],
             "type": ["BUG", "FEATURE"]

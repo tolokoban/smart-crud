@@ -1,8 +1,8 @@
 <?php
-include '{{NAME}}.security';
+include 'test.Issue.request.security';
 
 /**
- * Service {{NAME}}
+ * Service test.Issue.request
  *
  * @param $inputs
  * * __id__
@@ -18,9 +18,9 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'id', {{FIELDS}} );
+    $fields = Array( 'id', 'title', 'content', 'date', 'status', 'type' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
-    $sql = "SELECT $sqlFields FROM " . $DB->table( '{{TABLE}}' );
+    $sql = "SELECT $sqlFields FROM " . $DB->table( 'Issue' );
     $sqlWhere = '';
     if( array_key_exists( "id", $inputs ) ) {
         $id = $inputs['id'];
@@ -35,7 +35,7 @@ function execService( $inputs ) {
     }
 
     // Select count.
-    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( '{{TABLE}}' ) . $sqlWhere );
+    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Issue' ) . $sqlWhere );
     $row = $stm->fetch();
     $output = Array( "total" => $row[0] );    
 
@@ -51,7 +51,35 @@ function execService( $inputs ) {
     }
     $output['rows'] = $rows;
 
-{{LISTS}}    // Pagination.
+    // Linked lists.
+    $lists = Array('comments' => Array('Comment', 'issue'),
+        'votes' => Array('Vote', 'issue'),
+        'tags' => Array('Tag', 'tag'));
+    $ids = Array();
+    foreach( $rows as $row ) {
+        $ids[] = $row['id'];
+    }
+    foreach ( $lists as $field => $link ) {
+        $linkTable = $link[0];
+        $linkField = $link[1];
+        $values = Array();
+        $stm = $DB->query( "SELECT id, `$linkField` FROM " 
+                         . $DB->table( $linkTable )
+                         . " WHERE `$linkField` IN ?", $ids );
+        while( $row = $stm->fetch() ) {
+            $idLink = '#' . $row[0];
+            $id = '#' . $row[1];
+            if( !array_key_exists( $id, $values ) ) {
+                $values[$id] = Array();
+            }
+            $values[$id][] = $idLink;
+        }
+        $output['rows'][$field] = Array();
+        foreach( $id as $ids ) {
+            $output['rows'][$field][] = $values['#' . $id];
+        }
+    }
+    // Pagination.
     $page = 0;
     if( array_key_exists( 'page', $inputs ) ) {
         $page = intVal( $inputs["page"] );

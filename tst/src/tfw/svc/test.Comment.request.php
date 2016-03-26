@@ -1,8 +1,8 @@
 <?php
-include '{{NAME}}.security';
+include 'test.Comment.request.security';
 
 /**
- * Service {{NAME}}
+ * Service test.Comment.request
  *
  * @param $inputs
  * * __id__
@@ -18,9 +18,9 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'id', {{FIELDS}} );
+    $fields = Array( 'id', 'content', 'date' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
-    $sql = "SELECT $sqlFields FROM " . $DB->table( '{{TABLE}}' );
+    $sql = "SELECT $sqlFields FROM " . $DB->table( 'Comment' );
     $sqlWhere = '';
     if( array_key_exists( "id", $inputs ) ) {
         $id = $inputs['id'];
@@ -35,7 +35,7 @@ function execService( $inputs ) {
     }
 
     // Select count.
-    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( '{{TABLE}}' ) . $sqlWhere );
+    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Comment' ) . $sqlWhere );
     $row = $stm->fetch();
     $output = Array( "total" => $row[0] );    
 
@@ -51,7 +51,7 @@ function execService( $inputs ) {
     }
     $output['rows'] = $rows;
 
-{{LISTS}}    // Pagination.
+    // Pagination.
     $page = 0;
     if( array_key_exists( 'page', $inputs ) ) {
         $page = intVal( $inputs["page"] );

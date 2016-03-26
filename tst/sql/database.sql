@@ -1,35 +1,59 @@
-DROP TABLE IF EXISTS `Doctor`;
-CREATE TABLE `Doctor` (
+DROP TABLE IF EXISTS `test_Tag`;
+CREATE TABLE `test_Tag` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
   `name` VARCHAR(255)
 );
 
-DROP TABLE IF EXISTS `Doctor_Visit`;
-CREATE TABLE `Doctor_Visit` (
+DROP TABLE IF EXISTS `test_Issue_Tag`;
+CREATE TABLE `test_Issue_Tag` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `doctor` INT,
-  `visit` INT
+  PRIMARY KEY (`id`),
+  `tag` INT,
+  `issue` INT
 );
 
-DROP TABLE IF EXISTS `Patient`;
-CREATE TABLE `Patient` (
+DROP TABLE IF EXISTS `test_Issue`;
+CREATE TABLE `test_Issue` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255),
-  `age` INT,
-  `gender` ENUM('MALE', 'FEMALE', 'OTHER')
-);
-
-DROP TABLE IF EXISTS `Visit`;
-CREATE TABLE `Visit` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  `title` VARCHAR(255),
+  `content` TEXT,
+  `author` INT,
   `date` CHAR(14),
-  `status` ENUM('ASKED', 'PROPOSED', 'VALIDATED')
+  `status` ENUM('OPEN', 'FIXED', 'CLOSED'),
+  `type` ENUM('BUG', 'FEATURE')
 );
 
-DROP TABLE IF EXISTS `Patient_Visit`;
-CREATE TABLE `Patient_Visit` (
+DROP TABLE IF EXISTS `test_Comment`;
+CREATE TABLE `test_Comment` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `visit` INT,
-  `patient` INT
+  PRIMARY KEY (`id`),
+  `content` TEXT,
+  `author` INT,
+  `date` CHAR(14),
+  `issue` INT
+);
+
+DROP TABLE IF EXISTS `test_Vote`;
+CREATE TABLE `test_Vote` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  `user` INT,
+  `issue` INT,
+  `vote` INT
+);
+
+DROP TABLE IF EXISTS `test_User`;
+CREATE TABLE `test_User` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  `login` VARCHAR(255),
+  `password` VARCHAR(255),
+  `name` VARCHAR(255),
+  `comment` TEXT,
+  `roles` TEXT,
+  `enabled` INT,
+  `creation` CHAR(14)
 );
 

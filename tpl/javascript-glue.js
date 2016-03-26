@@ -1,8 +1,9 @@
+var WS = require("tfw.web-service");
 var Crud = require("smart-crud");
 
 
 function {{NAME}}( attribs ) {
-    Crud.Model.call( this, attribs, {{FIELDS}} );
+    Crud.Model.call( this, attribs, {{FIELDS}}, [] );
 }
 
 // Inheritance from Widget
@@ -11,4 +12,19 @@ function {{NAME}}( attribs ) {
 
 
 
-module.exports = {{NAME}};
+module.exports.create = function( obj ) {
+    return WS.get( '{{PREFIX}}.{{NAME}}.create' );
+};
+
+module.exports.request = function( criteria ) {
+    if( typeof criteria === 'undefined' ) criteria = {};
+    return WS.get( '{{PREFIX}}.{{NAME}}.request', criteria );
+};
+
+module.exports.update = function( obj ) {
+    return WS.get( '{{PREFIX}}.{{NAME}}.update' );
+};
+
+module.exports.delete = function( id ) {
+    return WS.get( '{{PREFIX}}.{{NAME}}.delete' );
+};

@@ -58,7 +58,10 @@ exports.isBaseType = function( type ) {
     return false;
 };
 
+
+
 exports.isScalarType = function( type ) {
     if( Array.isArray( type ) ) return true;
-    return /[a-zA-Z0-9]/.test( type.charAt( type.length - 1) );
+    if( type.type ) return true;
+    return false;
 };

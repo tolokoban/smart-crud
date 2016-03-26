@@ -20,7 +20,9 @@
         "modules": [],
         "compile": {
             "type": "firefoxos",
-            "files": ["\\.html$"]
+            "files": [
+                "\\.html$",
+            ]
         },
         "output": "../../../www/test"
     }

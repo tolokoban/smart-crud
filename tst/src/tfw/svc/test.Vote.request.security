@@ -1,7 +1,9 @@
 <?php
+$ROLE = "";
+
 function isGranted( $inputs ) {
     // @TODO Implement a security test.
-    error_log( 'Service [test.Doctor.request] is unsecure!' );
+    error_log( 'Service [test.Vote.request] is unsecure!' );
     return True;
 }
 ?>

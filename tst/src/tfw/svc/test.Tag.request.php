@@ -1,8 +1,8 @@
 <?php
-include 'test.Visit.request.security';
+include 'test.Tag.request.security';
 
 /**
- * Service test.Visit.request
+ * Service test.Tag.request
  *
  * @param $inputs
  * * __id__
@@ -18,10 +18,10 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'id', 'patient', 'doctor', 'date', 'status' );
+    $fields = Array( 'id', 'name' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
-    $sql = "SELECT $sqlFields FROM " $DB->table( 'Visit' );
-    $sqlWhere = ''
+    $sql = "SELECT $sqlFields FROM " . $DB->table( 'Tag' );
+    $sqlWhere = '';
     if( array_key_exists( "id", $inputs ) ) {
         $id = $inputs['id'];
         if( is_array( $id ) ) {
@@ -35,7 +35,7 @@ function execService( $inputs ) {
     }
 
     // Select count.
-    $stm = "SELECT Count(*) FROM " . $DB->table( 'Visit' ) . $sqlWhere;
+    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Tag' ) . $sqlWhere );
     $row = $stm->fetch();
     $output = Array( "total" => $row[0] );    
 
@@ -43,7 +43,7 @@ function execService( $inputs ) {
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array();
+        $data = Array( 'id' => $row['id'] );
         foreach( $fields as $field ) {
             $data[] = $row[$field];
         }
@@ -51,6 +51,32 @@ function execService( $inputs ) {
     }
     $output['rows'] = $rows;
 
+    // Linked lists.
+    $lists = Array('issues' => Array('Issue', 'issue'));
+    $ids = Array();
+    foreach( $rows as $row ) {
+        $ids[] = $row['id'];
+    }
+    foreach ( $lists as $field => $link ) {
+        $linkTable = $link[0];
+        $linkField = $link[1];
+        $values = Array();
+        $stm = $DB->query( "SELECT id, `$linkField` FROM " 
+                         . $DB->table( $linkTable )
+                         . " WHERE `$linkField` IN ?", $ids );
+        while( $row = $stm->fetch() ) {
+            $idLink = '#' . $row[0];
+            $id = '#' . $row[1];
+            if( !array_key_exists( $id, $values ) ) {
+                $values[$id] = Array();
+            }
+            $values[$id][] = $idLink;
+        }
+        $output['rows'][$field] = Array();
+        foreach( $id as $ids ) {
+            $output['rows'][$field][] = $values['#' . $id];
+        }
+    }
     // Pagination.
     $page = 0;
     if( array_key_exists( 'page', $inputs ) ) {

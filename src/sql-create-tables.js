@@ -1,13 +1,15 @@
-module.exports = function( tables ) {
+module.exports = function( tables, config ) {
     var output = '';
     var tableName, fields;
     var fieldName, fieldType;
     
     for( tableName in tables ) {
         fields = tables[tableName];
+        tableName = config.prefix + "_" + tableName;
         output += "DROP TABLE IF EXISTS `" + tableName + "`;\n";
         output += "CREATE TABLE `" + tableName + "` (\n";
-        output += "  `id` int(11) NOT NULL AUTO_INCREMENT";
+        output += "  `id` int(11) NOT NULL AUTO_INCREMENT,\n";
+        output += "  PRIMARY KEY (`id`)";
         for( fieldName in fields ) {
             fieldType = convertTypeToSQL( fields[fieldName] );
             output += ',\n  `' + fieldName + "` " + fieldType;

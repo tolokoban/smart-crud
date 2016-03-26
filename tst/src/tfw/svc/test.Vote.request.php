@@ -1,8 +1,8 @@
 <?php
-include 'test.Doctor.request.security';
+include 'test.Vote.request.security';
 
 /**
- * Service test.Doctor.request
+ * Service test.Vote.request
  *
  * @param $inputs
  * * __id__
@@ -18,10 +18,10 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'id', 'name' );
+    $fields = Array( 'id', 'vote' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
-    $sql = "SELECT $sqlFields FROM " $DB->table( 'Doctor' );
-    $sqlWhere = ''
+    $sql = "SELECT $sqlFields FROM " . $DB->table( 'Vote' );
+    $sqlWhere = '';
     if( array_key_exists( "id", $inputs ) ) {
         $id = $inputs['id'];
         if( is_array( $id ) ) {
@@ -35,7 +35,7 @@ function execService( $inputs ) {
     }
 
     // Select count.
-    $stm = "SELECT Count(*) FROM " . $DB->table( 'Doctor' ) . $sqlWhere;
+    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Vote' ) . $sqlWhere );
     $row = $stm->fetch();
     $output = Array( "total" => $row[0] );    
 
@@ -43,7 +43,7 @@ function execService( $inputs ) {
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array();
+        $data = Array( 'id' => $row['id'] );
         foreach( $fields as $field ) {
             $data[] = $row[$field];
         }
