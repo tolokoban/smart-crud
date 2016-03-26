@@ -3,7 +3,7 @@ CREATE TABLE `test_Tag` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`),
   `name` VARCHAR(255)
-);
+) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_Issue_Tag`;
 CREATE TABLE `test_Issue_Tag` (
@@ -11,7 +11,7 @@ CREATE TABLE `test_Issue_Tag` (
   PRIMARY KEY (`id`),
   `tag` INT,
   `issue` INT
-);
+) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_Issue`;
 CREATE TABLE `test_Issue` (
@@ -23,7 +23,7 @@ CREATE TABLE `test_Issue` (
   `date` CHAR(14),
   `status` ENUM('OPEN', 'FIXED', 'CLOSED'),
   `type` ENUM('BUG', 'FEATURE')
-);
+) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_Comment`;
 CREATE TABLE `test_Comment` (
@@ -33,7 +33,7 @@ CREATE TABLE `test_Comment` (
   `author` INT,
   `date` CHAR(14),
   `issue` INT
-);
+) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_Vote`;
 CREATE TABLE `test_Vote` (
@@ -42,7 +42,7 @@ CREATE TABLE `test_Vote` (
   `user` INT,
   `issue` INT,
   `vote` INT
-);
+) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_User`;
 CREATE TABLE `test_User` (
@@ -55,5 +55,5 @@ CREATE TABLE `test_User` (
   `roles` TEXT,
   `enabled` INT,
   `creation` CHAR(14)
-);
+) DEFAULT CHARSET=utf8;
 

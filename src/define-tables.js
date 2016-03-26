@@ -41,8 +41,9 @@ module.exports = function( config ) {
                                      + "of field `" + fieldName + "` "
                                      + "in table `" + tableName + "`!" );
                     }
-                    fieldType.list = fieldType.link.toLowerCase();
+                    fieldType.list = tableName.toLowerCase();
                     addLinkTable( tables, tableName, fieldType.link );
+                    fieldType.link = Utils.getLinkName( tableName, fieldType.link );
                 }
             }
         }

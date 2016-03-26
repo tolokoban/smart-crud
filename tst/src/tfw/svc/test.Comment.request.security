@@ -3,7 +3,8 @@ $ROLE = "";
 
 function isGranted( $inputs ) {
     // @TODO Implement a security test.
-    error_log( 'Service [test.Comment.request] is unsecure!' );
+    error_log( '[test.Comment.request] This service is  not secure!' );
+    error_log( 'Please edit the following file: "test.Comment.request.security".' );
     return True;
 }
 ?>

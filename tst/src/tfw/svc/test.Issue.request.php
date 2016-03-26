@@ -18,9 +18,9 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'id', 'title', 'content', 'date', 'status', 'type' );
+    $fields = Array( 'title', 'content', 'date', 'status', 'type' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
-    $sql = "SELECT $sqlFields FROM " . $DB->table( 'Issue' );
+    $sql = "SELECT id, $sqlFields FROM " . $DB->table( 'Issue' );
     $sqlWhere = '';
     if( array_key_exists( "id", $inputs ) ) {
         $id = $inputs['id'];
@@ -37,56 +37,58 @@ function execService( $inputs ) {
     // Select count.
     $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Issue' ) . $sqlWhere );
     $row = $stm->fetch();
-    $output = Array( "total" => $row[0] );    
+    $output = Array( "total" => intVal( $row[0] ) );    
 
     // Loop over rows.
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array( 'id' => $row['id'] );
+        $data = Array();
         foreach( $fields as $field ) {
             $data[] = $row[$field];
         }
-        $rows[] = $data;
+        $rows[$row['id']] = $data;
     }
     $output['rows'] = $rows;
 
     // Linked lists.
-    $lists = Array('comments' => Array('Comment', 'issue'),
+    if( count( $rows ) > 0 ) {
+        $lists = Array('comments' => Array('Comment', 'issue'),
         'votes' => Array('Vote', 'issue'),
-        'tags' => Array('Tag', 'tag'));
-    $ids = Array();
-    foreach( $rows as $row ) {
-        $ids[] = $row['id'];
-    }
-    foreach ( $lists as $field => $link ) {
-        $linkTable = $link[0];
-        $linkField = $link[1];
-        $values = Array();
-        $stm = $DB->query( "SELECT id, `$linkField` FROM " 
-                         . $DB->table( $linkTable )
-                         . " WHERE `$linkField` IN ?", $ids );
-        while( $row = $stm->fetch() ) {
-            $idLink = '#' . $row[0];
-            $id = '#' . $row[1];
-            if( !array_key_exists( $id, $values ) ) {
-                $values[$id] = Array();
+        'tags' => Array('Issue_Tag', 'issue'));
+
+        $ids = Array();
+        foreach( $rows as $id => &$row ) {
+            $ids[] = $id;
+            foreach( $lists => $x ) {
+                $row[] = Array();
             }
-            $values[$id][] = $idLink;
         }
-        $output['rows'][$field] = Array();
-        foreach( $id as $ids ) {
-            $output['rows'][$field][] = $values['#' . $id];
+        $ids = implode( ',', $ids );
+        foreach ( $lists as $field => $link ) {
+            $linkTable = $link[0];
+            $linkField = $link[1];
+            $sql = "SELECT id, `$linkField` FROM " 
+                   . $DB->table( $linkTable )
+                   . " WHERE `$linkField` IN ($ids)";
+error_log( "sql = $sql   " );
+            $stm = $DB->query( $sql );
+            while( $row = $stm->fetch() ) {
+                $idLink = intVal( $row[0] );
+                $id = $row[1];
+                $rows[$id][6][] = $idLink;
+            }
         }
     }
+
     // Pagination.
     $page = 0;
     if( array_key_exists( 'page', $inputs ) ) {
         $page = intVal( $inputs["page"] );
     }
     $limit = 20;
-    if( array_key_exists( 'limit', $input ) ) {
-        $limit = intVal( $input["limit"] );
+    if( array_key_exists( 'limit', $inputs ) ) {
+        $limit = intVal( $inputs["limit"] );
     }
     $output['page'] = $page;
     $output['limit'] = $limit;
@@ -96,7 +98,7 @@ function execService( $inputs ) {
 
 
 function surroundWithQuotes( $item ) {
-    return "'$item'";
+    return "`$item`";
 }
 
 ?>

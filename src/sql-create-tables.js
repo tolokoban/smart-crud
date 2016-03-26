@@ -15,7 +15,7 @@ module.exports = function( tables, config ) {
             output += ',\n  `' + fieldName + "` " + fieldType;
         }
 
-        output += "\n);\n\n";
+        output += "\n) DEFAULT CHARSET=utf8;\n\n";
     }
     
     return output;
