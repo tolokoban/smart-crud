@@ -3,7 +3,7 @@ var Crud = require("smart-crud");
 
 
 function Issue( attribs ) {
-    Crud.Model.call( this, attribs, ["title","content","author","date","status","type"], ["comments","votes","tags"] );
+    Crud.Model.call( this, attribs, ["title","content","date","status","type"], ["author","comments","votes","tags"] );
 }
 
 // Inheritance from Widget
@@ -22,32 +22,27 @@ module.exports.request = function( criteria ) {
         WS.get( 'test.Issue.request', criteria ).then(
             function( data ) {
                 var parsedRows = [];
-console.info("[javascript-glue] data.rows=...", data.rows);
-                var id, row;
-                for( id in data.rows ) {
-                    row = data.rows[id];
-                    parsedRows.push(new Issue({ 
-                        id: id,
+                data.rows.forEach(function( row ) {
+                    parsedRows.push(new Issue({
                         "title": row[0],
                         "content": row[1],
-                        "author": row[2],
-                        "date": row[3],
-                        "status": row[4],
-                        "type": row[5],
+                        "date": row[2],
+                        "status": row[3],
+                        "type": row[4],
+                        "author": row[5],
                         "comments": row[6],
                         "votes": row[7],
                         "tags": row[8]
                     }));
-                };
-            }, reject
-        );
-    });
-};
+                }, reject
+                                 );
+            });
+    };
 
-module.exports.update = function( obj ) {
-    return WS.get( 'test.Issue.update' );
-};
+                       module.exports.update = function( obj ) {
+                           return WS.get( 'test.Issue.update' );
+                       };
 
-module.exports.delete = function( id ) {
-    return WS.get( 'test.Issue.delete' );
-};
+                       module.exports.delete = function( id ) {
+                           return WS.get( 'test.Issue.delete' );
+                       };

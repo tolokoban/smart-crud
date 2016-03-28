@@ -21,6 +21,8 @@ module.exports = function( config ) {
     var table;
     var tableName, tableDef;
     var fieldName, fieldType;
+    // Sometimes, We must add new tables for links.
+    var newTables = {};
 
     for( tableName in config.data ) {
         table = {};
@@ -42,23 +44,34 @@ module.exports = function( config ) {
                                      + "in table `" + tableName + "`!" );
                     }
                     fieldType.list = tableName.toLowerCase();
-                    addLinkTable( tables, tableName, fieldType.link );
+                    addLinkTable( tables, tableName, fieldType.link, newTables );
                     fieldType.link = Utils.getLinkName( tableName, fieldType.link );
                 }
             }
         }
     }
 
+    if( typeof config.extraTables === 'undefined' ) config.extraTables = {};
+
+    // Adding link tables if any.
+    for( tableName in newTables ) {
+        config.data[tableName] = newTables[tableName];
+        config.extraTables[tableName] = 1;
+    }
+
     return tables;
 };
 
 
-function addLinkTable( tables, table1, table2 ) {
-    var name = Utils.getLinkName( table1, table2 );
+function addLinkTable( tables, table1, table2, newTables ) {
+    var name = table1 + "_" + table2;
     if( typeof tables[name] === 'undefined' ) {
         tables[name] = {};
         tables[name][table1.toLowerCase()] = "INT";
-        tables[name][table2.toLowerCase()] = "INT";
+        newTables[name] = {
+            id: { type: "INT" }
+        };
+        newTables[name][table1.toLowerCase()] = { type: "INT" };
     }
     return tables[name];
 }

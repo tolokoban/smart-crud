@@ -2,36 +2,34 @@ var WS = require("tfw.web-service");
 var Crud = require("smart-crud");
 
 
-function Comment( attribs ) {
-    Crud.Model.call( this, attribs, ["content","author","date","issue"], [] );
+function Tag_Issue( attribs ) {
+    Crud.Model.call( this, attribs, ["id","tag"], [] );
 }
 
 // Inheritance from Widget
-Comment.prototype = Object.create(Crud.Model.prototype);
-Comment.prototype.constructor = Comment;
+Tag_Issue.prototype = Object.create(Crud.Model.prototype);
+Tag_Issue.prototype.constructor = Tag_Issue;
 
 
 
 module.exports.create = function( obj ) {
-    return WS.get( 'test.Comment.create' );
+    return WS.get( 'test.Tag_Issue.create' );
 };
 
 module.exports.request = function( criteria ) {
     if( typeof criteria === 'undefined' ) criteria = {};
     return new Promise(function( resolve, reject ) {
-        WS.get( 'test.Comment.request', criteria ).then(
+        WS.get( 'test.Tag_Issue.request', criteria ).then(
             function( data ) {
                 var parsedRows = [];
 console.info("[javascript-glue] data.rows=...", data.rows);
                 var id, row;
                 for( id in data.rows ) {
                     row = data.rows[id];
-                    parsedRows.push(new Comment({ 
+                    parsedRows.push(new Tag_Issue({ 
                         id: id,
-                        "content": row[0],
-                        "author": row[1],
-                        "date": row[2],
-                        "issue": row[3]
+                        "id": row[0],
+                        "tag": row[1]
                     }));
                 };
             }, reject
@@ -40,9 +38,9 @@ console.info("[javascript-glue] data.rows=...", data.rows);
 };
 
 module.exports.update = function( obj ) {
-    return WS.get( 'test.Comment.update' );
+    return WS.get( 'test.Tag_Issue.update' );
 };
 
 module.exports.delete = function( id ) {
-    return WS.get( 'test.Comment.delete' );
+    return WS.get( 'test.Tag_Issue.delete' );
 };

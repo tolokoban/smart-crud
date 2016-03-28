@@ -18,7 +18,7 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'content', 'date' );
+    $fields = Array( 'content', 'author', 'date', 'issue' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
     $sql = "SELECT id, $sqlFields FROM " . $DB->table( 'Comment' );
     $sqlWhere = '';
@@ -42,14 +42,16 @@ function execService( $inputs ) {
     // Loop over rows.
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
+    $ids = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array();
-        foreach( $fields as $field ) {
-            $data[] = $row[$field];
-        }
-        $rows[$row['id']] = $data;
+        $id = $row['id'];
+        $ids[] = $id;
+        $rows[$id] = Array(
+            $row['content'],
+            intVal( $row['author'] ),
+            $row['date'],
+            intVal( $row['issue'] ));
     }
-    $output['rows'] = $rows;
 
     // Pagination.
     $page = 0;
@@ -62,6 +64,8 @@ function execService( $inputs ) {
     }
     $output['page'] = $page;
     $output['limit'] = $limit;
+
+    $output['rows'] = $rows;
 
     return $output;
 }

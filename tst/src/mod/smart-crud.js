@@ -8,8 +8,6 @@ function Model( values, scalars, sets ) {
 
     var listeners = [];
 
-    
-
     scalars.forEach(function ( name ) {
         Object.defineProperty( this, name, {
             get: function() {
@@ -22,9 +20,7 @@ function Model( values, scalars, sets ) {
             },
             enumerable: true
         });
-    });
-
-
+    }, this);
 }
 
 

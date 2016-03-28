@@ -1,8 +1,8 @@
 <?php
-include 'test.Vote.request.security';
+include 'test.Issue_Tag.request.security';
 
 /**
- * Service test.Vote.request
+ * Service test.Issue_Tag.request
  *
  * @param $inputs
  * * __id__
@@ -18,9 +18,9 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'user', 'issue', 'vote' );
+    $fields = Array( 'id', 'issue' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
-    $sql = "SELECT id, $sqlFields FROM " . $DB->table( 'Vote' );
+    $sql = "SELECT id, $sqlFields FROM " . $DB->table( 'Issue_Tag' );
     $sqlWhere = '';
     if( array_key_exists( "id", $inputs ) ) {
         $id = $inputs['id'];
@@ -35,7 +35,7 @@ function execService( $inputs ) {
     }
 
     // Select count.
-    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Vote' ) . $sqlWhere );
+    $stm = $DB->query( "SELECT Count(*) FROM " . $DB->table( 'Issue_Tag' ) . $sqlWhere );
     $row = $stm->fetch();
     $output = Array( "total" => intVal( $row[0] ) );    
 
@@ -47,9 +47,8 @@ function execService( $inputs ) {
         $id = $row['id'];
         $ids[] = $id;
         $rows[$id] = Array(
-            intVal( $row['user'] ),
-            intVal( $row['issue'] ),
-            intVal( $row['vote'] ));
+            intVal( $row['id'] ),
+            intVal( $row['issue'] ));
     }
 
     // Pagination.

@@ -26,19 +26,22 @@ module.exports = function( config ) {
     var data = config.data;
 
     var output = {};
-    var tableName, fields;
+    var tableName, scalarFields, setFields;
     var fieldName, fieldType;
-    
+
     for( tableName in data ) {
-        fields = [];
+        scalarFields = [];
+        setFields = [];
         for( fieldName in data[tableName] ) {
             fieldType = data[tableName][fieldName];
-            if( Utils.isScalarType( fieldType ) ) {
-                fields.push( fieldName );
+            if( fieldType.list ) {
+                setFields.push( fieldName );
+            } else {
+                scalarFields.push( fieldName );
             }
         }
-        createRequestService( config, tableName, fields );
-        createJavascriptGlue( config, tableName, fields );
+        createRequestService( config, tableName, scalarFields, setFields );
+        createJavascriptGlue( config, tableName, scalarFields, setFields );
     }
 
     Utils.write(
@@ -49,10 +52,10 @@ module.exports = function( config ) {
     return output;
 };
 
-function createRequestService( config, tableName, fields ) {
+function createRequestService( config, tableName, scalarFields, setFields ) {
     var name = config.prefix + "." + tableName + ".request";
     var filenameWithoutExt = Path.join(
-        config.$dirname, "src", "tfw", "svc", name        
+        config.$dirname, "src", "tfw", "svc", name
     );
 
     var lists = [];
@@ -64,9 +67,44 @@ function createRequestService( config, tableName, fields ) {
         }
     }
 
+    var rows = "        $id = $row['id'];\n"
+            + "        $ids[] = $id;\n"
+            + "        $rows[$id] = Array(";
+    var first = true;
+    var baseIndex = 0;
+    for( fieldName in config.data[tableName] ) {
+        fieldType = config.data[tableName][fieldName];
+        if( fieldType.list ) continue;
+        baseIndex++;
+        if( first ) first = false;
+        else rows += ",";
+        rows += "\n            ";
+        if( fieldType.link ) {
+            rows += "intVal( $row['" + fieldName + "'] )";
+        } else {
+            switch( fieldType.type ) {
+            case 'INT':
+                rows += "intVal( $row['" + fieldName + "'] )";
+                break;
+            case 'FLOAT':
+                rows += "intFloat( $row['" + fieldName + "'] )";
+                break;
+            default:
+                rows += "$row['" + fieldName + "']";
+            }
+        }
+    }
+    var indexes = [];
+    lists.forEach(function ( itm ) {
+        rows += ",\n            Array()";
+        indexes.push( baseIndex++ );
+    });
+    rows += ");";
+
     var codeForLists = '';
     if( lists.length > 0 ) {
         codeForLists = Template.file( 'request.lists.php', {
+            INDEXES: indexes.join( ', ' ),
             LISTS: lists.map( function( itm ) {
                 return "'" + itm[0] + "' => Array('" + itm[1] + "', '" + itm[2] + "')";
             }).join( ',\n        ' )
@@ -76,7 +114,8 @@ function createRequestService( config, tableName, fields ) {
     var content = Template.file( 'request.php', {
         NAME: name,
         TABLE: tableName,
-        FIELDS: fields.map( function( item ) { return "'" + item + "'"; } ).join( ", " ),
+        FIELDS: scalarFields.map( function( item ) { return "'" + item + "'"; } ).join( ", " ),
+        ROWS: rows,
         LISTS: codeForLists
     });
     Utils.write( filenameWithoutExt + ".php", content.out );
@@ -86,16 +125,28 @@ function createRequestService( config, tableName, fields ) {
 }
 
 
-function createJavascriptGlue( config, tableName, fields ) {
+function createJavascriptGlue( config, tableName, scalarFields, setFields ) {
     var name = config.prefix + ".model." + tableName.toLowerCase();
     var filenameWithoutExt = Path.join(
         config.$dirname, "src", "mod", name
     );
-    
+
+    var request = '';
+    scalarFields.forEach(function ( itm, idx ) {
+        request += ',\n                        "' + itm + '": row[' + idx + "]";
+    });
+    setFields.forEach(function ( itm, idx ) {
+        request += ',\n                        "' 
+            + itm + '": row[' + (scalarFields.length + idx) + "]";
+    });
+
+
     var content = Template.file( 'javascript-glue.js', {
         NAME: tableName,
-        FIELDS: JSON.stringify( fields ),
-        PREFIX: config.prefix
+        SCALAR: JSON.stringify( scalarFields ),
+        SET: JSON.stringify( setFields ),
+        PREFIX: config.prefix,
+        REQUEST: request
     });
     Utils.write( filenameWithoutExt + ".js", content.out );
 }

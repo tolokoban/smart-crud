@@ -3,7 +3,7 @@ var Crud = require("smart-crud");
 
 
 function Vote( attribs ) {
-    Crud.Model.call( this, attribs, ["vote"], [] );
+    Crud.Model.call( this, attribs, ["user","issue","vote"], [] );
 }
 
 // Inheritance from Widget
@@ -18,7 +18,24 @@ module.exports.create = function( obj ) {
 
 module.exports.request = function( criteria ) {
     if( typeof criteria === 'undefined' ) criteria = {};
-    return WS.get( 'test.Vote.request', criteria );
+    return new Promise(function( resolve, reject ) {
+        WS.get( 'test.Vote.request', criteria ).then(
+            function( data ) {
+                var parsedRows = [];
+console.info("[javascript-glue] data.rows=...", data.rows);
+                var id, row;
+                for( id in data.rows ) {
+                    row = data.rows[id];
+                    parsedRows.push(new Vote({ 
+                        id: id,
+                        "user": row[0],
+                        "issue": row[1],
+                        "vote": row[2]
+                    }));
+                };
+            }, reject
+        );
+    });
 };
 
 module.exports.update = function( obj ) {

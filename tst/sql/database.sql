@@ -5,12 +5,11 @@ CREATE TABLE `test_Tag` (
   `name` VARCHAR(255)
 ) DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `test_Issue_Tag`;
-CREATE TABLE `test_Issue_Tag` (
+DROP TABLE IF EXISTS `test_Tag_Issue`;
+CREATE TABLE `test_Tag_Issue` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`),
-  `tag` INT,
-  `issue` INT
+  `tag` INT
 ) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_Issue`;
@@ -23,6 +22,13 @@ CREATE TABLE `test_Issue` (
   `date` CHAR(14),
   `status` ENUM('OPEN', 'FIXED', 'CLOSED'),
   `type` ENUM('BUG', 'FEATURE')
+) DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `test_Issue_Tag`;
+CREATE TABLE `test_Issue_Tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  `issue` INT
 ) DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `test_Comment`;

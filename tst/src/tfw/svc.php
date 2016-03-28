@@ -270,7 +270,7 @@ $json = 'ERROR';
 if (hasRole($ROLE)) {
     try {
         $output = execService($input, new System());
-        $json = json_encode( $output, JSON_FORCE_OBJECT );
+        $json = json_encode( $output );
     }
     catch (Exception $e) {
         $msg = $e->getMessage();

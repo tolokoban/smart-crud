@@ -18,7 +18,7 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'title', 'content', 'date', 'status', 'type' );
+    $fields = Array( 'title', 'content', 'author', 'date', 'status', 'type' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
     $sql = "SELECT id, $sqlFields FROM " . $DB->table( 'Issue' );
     $sqlWhere = '';
@@ -42,41 +42,47 @@ function execService( $inputs ) {
     // Loop over rows.
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
+    $ids = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array();
-        foreach( $fields as $field ) {
-            $data[] = $row[$field];
-        }
-        $rows[$row['id']] = $data;
+        $id = $row['id'];
+        $ids[] = $id;
+        $rows[$id] = Array(
+            $row['title'],
+            $row['content'],
+            intVal( $row['author'] ),
+            $row['date'],
+            $row['status'],
+            $row['type'],
+            Array(),
+            Array(),
+            Array());
     }
-    $output['rows'] = $rows;
 
     // Linked lists.
     if( count( $rows ) > 0 ) {
+        $indexes = Array( 6, 7, 8 );
         $lists = Array('comments' => Array('Comment', 'issue'),
         'votes' => Array('Vote', 'issue'),
         'tags' => Array('Issue_Tag', 'issue'));
-
-        $ids = Array();
-        foreach( $rows as $id => &$row ) {
-            $ids[] = $id;
-            foreach( $lists => $x ) {
-                $row[] = Array();
-            }
-        }
         $ids = implode( ',', $ids );
-        foreach ( $lists as $field => $link ) {
+        $k = 0;
+        foreach( $lists as $field => $link ) {
             $linkTable = $link[0];
             $linkField = $link[1];
             $sql = "SELECT id, `$linkField` FROM " 
                    . $DB->table( $linkTable )
                    . " WHERE `$linkField` IN ($ids)";
-error_log( "sql = $sql   " );
+error_log( $sql );
             $stm = $DB->query( $sql );
+            $index = $indexes[$k];
+error_log( "index = $index");
+            $k++;
             while( $row = $stm->fetch() ) {
                 $idLink = intVal( $row[0] );
                 $id = $row[1];
-                $rows[$id][6][] = $idLink;
+error_log( "id=$id, idLink=$idLink" );
+                $rows[$id][$index][] = $idLink;
+error_log( json_encode( $rows[$id] ) );
             }
         }
     }
@@ -92,6 +98,8 @@ error_log( "sql = $sql   " );
     }
     $output['page'] = $page;
     $output['limit'] = $limit;
+
+    $output['rows'] = $rows;
 
     return $output;
 }

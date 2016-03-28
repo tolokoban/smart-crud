@@ -42,14 +42,10 @@ function execService( $inputs ) {
     // Loop over rows.
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
+    $ids = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array();
-        foreach( $fields as $field ) {
-            $data[] = $row[$field];
-        }
-        $rows[$row['id']] = $data;
+{{ROWS}}
     }
-    $output['rows'] = $rows;
 
 {{LISTS}}    // Pagination.
     $page = 0;
@@ -62,6 +58,8 @@ function execService( $inputs ) {
     }
     $output['page'] = $page;
     $output['limit'] = $limit;
+
+    $output['rows'] = $rows;
 
     return $output;
 }

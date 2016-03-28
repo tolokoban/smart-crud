@@ -3,7 +3,7 @@ var Crud = require("smart-crud");
 
 
 function {{NAME}}( attribs ) {
-    Crud.Model.call( this, attribs, {{FIELDS}}, [] );
+    Crud.Model.call( this, attribs, {{SCALAR}}, {{SET}} );
 }
 
 // Inheritance from Widget
@@ -18,7 +18,21 @@ module.exports.create = function( obj ) {
 
 module.exports.request = function( criteria ) {
     if( typeof criteria === 'undefined' ) criteria = {};
-    return WS.get( '{{PREFIX}}.{{NAME}}.request', criteria );
+    return new Promise(function( resolve, reject ) {
+        WS.get( '{{PREFIX}}.{{NAME}}.request', criteria ).then(
+            function( data ) {
+                var parsedRows = [];
+console.info("[javascript-glue] data.rows=...", data.rows);
+                var id, row;
+                for( id in data.rows ) {
+                    row = data.rows[id];
+                    parsedRows.push(new {{NAME}}({ 
+                        id: id{{REQUEST}}
+                    }));
+                };
+            }, reject
+        );
+    });
 };
 
 module.exports.update = function( obj ) {

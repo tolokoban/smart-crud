@@ -18,7 +18,7 @@ function execService( $inputs ) {
 
     global $DB;
 
-    $fields = Array( 'login', 'password', 'name', 'comment', 'roles', 'creation' );
+    $fields = Array( 'login', 'password', 'name', 'comment', 'roles', 'enabled', 'creation' );
     $sqlFields = implode( ',', array_map( "surroundWithQuotes", $fields ) );
     $sql = "SELECT id, $sqlFields FROM " . $DB->table( 'User' );
     $sqlWhere = '';
@@ -42,14 +42,19 @@ function execService( $inputs ) {
     // Loop over rows.
     $stm = $DB->query( $sql . $sqlWhere );
     $rows = Array();
+    $ids = Array();
     while( $row = $stm->fetch() ) {
-        $data = Array();
-        foreach( $fields as $field ) {
-            $data[] = $row[$field];
-        }
-        $rows[$row['id']] = $data;
+        $id = $row['id'];
+        $ids[] = $id;
+        $rows[$id] = Array(
+            $row['login'],
+            $row['password'],
+            $row['name'],
+            $row['comment'],
+            $row['roles'],
+            intVal( $row['enabled'] ),
+            $row['creation']);
     }
-    $output['rows'] = $rows;
 
     // Pagination.
     $page = 0;
@@ -62,6 +67,8 @@ function execService( $inputs ) {
     }
     $output['page'] = $page;
     $output['limit'] = $limit;
+
+    $output['rows'] = $rows;
 
     return $output;
 }
