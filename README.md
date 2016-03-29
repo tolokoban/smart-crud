@@ -1,32 +1,43 @@
 # smart-crud
 Fast and easy CRUD application maker.
 
-## crud.yaml
+__Do not use it now, because it is far from beeing ready!__
+
+----
+
+## sample1.json
 
 ```
-classes:
-  Student:
-    firstname: STRING
-    lastname: STRING
-    age: INTEGER
-    parent: Parent*
-    teacher: Teacher
-    $create: TEACHER
-    $update: TEACHER | PARENT
-    $delete: TEACHER
-  Parent:
-    user: User?
-    firstname: STRING
-    lastname: STRING
-    students: Student*
-      $create: TEACHER | user == $user
-      $delete: TEACHER
-  Teacher:
-    user: User?
-    firstname: STRING
-    lastname: STRING
-    students: Student*
-    $update: user == $user
-    $delete: ADMIN
+{
+    "prefix": "test",
+    "data": {
+        "Tag": {
+            "name": "CHAR",
+            "issues": "Issue*"
+        },
+        "Issue": {
+            "title": "CHAR",
+            "content": "TEXT",
+            "author": "User",
+            "date": "DATETIME",
+            "comments": "#Comment.issue",
+            "votes": "#Vote.issue",
+            "tags": "Tag*",
+            "status": ["OPEN", "FIXED", "CLOSED"],
+            "type": ["BUG", "FEATURE"]
+        },
+        "Comment": {
+            "content": "TEXT",
+            "author": "User",
+            "date": "DATETIME",
+            "issue": "Issue"
+        },
+        "Vote": {
+            "user": "User",
+            "issue": "Issue",
+            "vote": "INT"
+        }
+    }
+}
 ```
 
