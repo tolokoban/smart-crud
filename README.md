@@ -10,10 +10,13 @@ __Do not use it now, because it is far from beeing ready!__
 ```js
 {Data
   tables: {
-    organization: { name: string256 }
-    carecenter: { name: string256 }
-    patient: { key: string64 }
-    patient-form: { value: string }
+    issue: { 
+      title: string256, 
+      desc: string 
+      type: [QUESTION BUG IMPROVEMENT]
+      status: [NEW REJECTED ASSIGNED TEST RESOLVED]
+    }
+    comment: { desc: string, date: date }
   }
   
   access: {
@@ -21,9 +24,11 @@ __Do not use it now, because it is far from beeing ready!__
   }
 
   links: [
-    { carecenter: organization, organization: carecenters* }
-    { patient: organization, organization: patients* }
-    { patient-form: organization, organization: patient-forms* }
+    { issue: author, user: - }
+    { issue: solver, user: - }
+    { comment: issue, issue: comments }
+    { comment: author, user: - }
   ]
-}```
+}
+```
 
