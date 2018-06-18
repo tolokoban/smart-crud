@@ -7,37 +7,23 @@ __Do not use it now, because it is far from beeing ready!__
 
 ## sample1.json
 
-```
-{
-    "prefix": "test",
-    "data": {
-        "Tag": {
-            "name": "CHAR",
-            "issues": "Issue*"
-        },
-        "Issue": {
-            "title": "CHAR",
-            "content": "TEXT",
-            "author": "User",
-            "date": "DATETIME",
-            "comments": "#Comment.issue",
-            "votes": "#Vote.issue",
-            "tags": "Tag*",
-            "status": ["OPEN", "FIXED", "CLOSED"],
-            "type": ["BUG", "FEATURE"]
-        },
-        "Comment": {
-            "content": "TEXT",
-            "author": "User",
-            "date": "DATETIME",
-            "issue": "Issue"
-        },
-        "Vote": {
-            "user": "User",
-            "issue": "Issue",
-            "vote": "INT"
-        }
-    }
-}
-```
+```js
+{Data
+  tables: {
+    organization: { name: string256 }
+    carecenter: { name: string256 }
+    patient: { key: string64 }
+    patient-form: { value: string }
+  }
+  
+  access: {
+    organization: { CRUD: ADMIN }
+  }
+
+  links: [
+    { carecenter: organization, organization: carecenters* }
+    { patient: organization, organization: patients* }
+    { patient-form: organization, organization: patient-forms* }
+  ]
+}```
 
