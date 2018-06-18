@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "colors": "^1.1.2",
-        "readline-sync": "^1.4.1"
+        "readline-sync": "^1.4.1",
+        "toloframework-permissive-json": "^1.0.5"
     }
 }

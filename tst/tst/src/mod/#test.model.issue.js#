@@ -1,0 +1,48 @@
+var WS = require("tfw.web-service");
+var Crud = require("smart-crud");
+
+
+function Issue( attribs ) {
+    Crud.Model.call( this, attribs, ["title","content","date","status","type"], ["author","comments","votes","tags"] );
+}
+
+// Inheritance from Widget
+Issue.prototype = Object.create(Crud.Model.prototype);
+Issue.prototype.constructor = Issue;
+
+
+
+module.exports.create = function( obj ) {
+    return WS.get( 'test.Issue.create' );
+};
+
+module.exports.request = function( criteria ) {
+    if( typeof criteria === 'undefined' ) criteria = {};
+    return new Promise(function( resolve, reject ) {
+        WS.get( 'test.Issue.request', criteria ).then(
+            function( data ) {
+                var parsedRows = [];
+                data.rows.forEach(function( row ) {
+                    parsedRows.push(new Issue({
+                        "title": row[0],
+                        "content": row[1],
+                        "date": row[2],
+                        "status": row[3],
+                        "type": row[4],
+                        "author": row[5],
+                        "comments": row[6],
+                        "votes": row[7],
+                        "tags": row[8]
+                    }));
+                }, reject
+                                 );
+            });
+    };
+
+                       module.exports.update = function( obj ) {
+                           return WS.get( 'test.Issue.update' );
+                       };
+
+                       module.exports.delete = function( id ) {
+                           return WS.get( 'test.Issue.delete' );
+                       };

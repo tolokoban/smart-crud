@@ -1,0 +1,10 @@
+<?php
+$ROLE = "";
+
+function isGranted( $inputs ) {
+    // @TODO Implement a security test.
+    error_log( '[test.Vote.request] This service is  not secure!' );
+    error_log( 'Please edit the following file: "test.Vote.request.security".' );
+    return True;
+}
+?>
