@@ -10,7 +10,7 @@ var Utils = require("./utils");
 
 
 /**
- * @return the config value, on `null` if an error occured while parsing.
+ * @return the config value, or `null` if an error occured while parsing.
  * The followiong attribute will been added to the config value:
  * * __$filename__: full path of the config file.
  * * __$dirname__: full path of the directorfy where the config file lies.

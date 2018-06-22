@@ -1,0 +1,26 @@
+{
+  structure: {
+    organisation: {
+      name: string
+      !carecenters: carecenter*
+    }
+    carecenter: {
+      name: string
+      @consultants: user*
+      @organisation: organisation
+      @patients: patient*
+    }
+    patient: {
+      !admissions: admission*
+    }
+    admission: {
+      enter: date
+      exit: date
+      !consultations: consultation
+    }
+    consultation: {
+      date: date
+      @admission: admission
+    }
+  }
+}
