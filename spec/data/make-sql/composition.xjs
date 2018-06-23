@@ -1,0 +1,11 @@
+{
+  structure: {
+    group: {
+      !students: student*
+    }
+    student: {
+      name: string256
+      @group: group
+    }
+  }
+}
