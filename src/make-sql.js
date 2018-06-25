@@ -10,51 +10,8 @@ module.exports = function( def ) {
   else structure = JSON.parse( JSON.stringify( def.structure ) );
 
   addTableUser( structure );
-
-  try {
-    for( tableName in structure ) {
-      fields = structure[tableName];
-      output += "DROP TABLE IF EXISTS `${PREFIX}" + tableName + "`;\n";
-      output += "CREATE TABLE `" + tableName + "` (\n";
-      output += "  `id` INT(11) NOT NULL AUTO_INCREMENT";
-      for( fieldName in fields ) {
-        try {
-          if( fieldType.link ) continue;
-          
-          fieldType = expandType( fields[fieldName] );          
-          output += ',\n  `' + fieldName + "` " + fieldType.sql;
-          if( typeof fieldType.default !== 'undefined' ) {
-            output += " DEFAULT '" + fieldType.default + "'";
-          }
-        }
-        catch( ex ) {
-          throw "Unable to parse " + fieldName + ": " + JSON.stringify( fields[fieldName] ) + "\n" + ex;
-        }
-      }
-
-      output += "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n\n";
-
-      output += "ALTER TABLE `${PREFIX}" + tableName + "`\n";
-      output += "  ADD PRIMARY KEY (`id`)";
-      for( fieldName in fields ) {
-        fieldType = fields[ fieldName ];
-        if( typeof fieldType.key === 'string' ) {
-          switch( fieldType.key.toLowerCase() ) {
-          case 'index':
-            output += ",\n  ADD KEY `" + fieldName + "` (`" + fieldName + "`)";
-            break;
-          case 'unique':
-            output += ",\n  ADD UNIQUE KEY `" + fieldName + "` (`" + fieldName + "`)";
-            break;
-          }
-        }
-      }
-      output += ";\n\n";      
-    }
-  }
-  catch( ex ) {
-    throw "Error in the structure:\n" + JSON.stringify( structure, null, '  ' ) + "\n" + ex;
-  }
+  output += getCodeForTables( structure );
+  output += getCodeForKeys( structure );
 
   return output;
 };
@@ -115,4 +72,73 @@ function addTableUser( structure ) {
   user.enabled = { type: "boolean" };
   user.creation = { type: "datetime" };
   user.data = { type: "string" };
+}
+
+
+function getCodeForTables( structure ) {
+  var output = '';
+  var tableName, fields, fieldName, fieldType;
+  
+  try {
+    for( tableName in structure ) {
+      fields = structure[tableName];
+      output += "DROP TABLE IF EXISTS `${PREFIX}" + tableName + "`;\n";
+      output += "CREATE TABLE `" + tableName + "` (\n";
+      output += "  `id` INT(11) NOT NULL AUTO_INCREMENT";
+      for( fieldName in fields ) {
+        if( fields[fieldName].link ) continue;
+
+        try {
+          fieldType = expandType( fields[fieldName] );
+          output += ',\n  `' + fieldName + "` " + fieldType.sql;
+          if( typeof fieldType.default !== 'undefined' ) {
+            output += " DEFAULT '" + fieldType.default + "'";
+          }
+        }
+        catch( ex ) {
+          throw "Unable to parse " + fieldName + ": " + JSON.stringify( fields[fieldName] ) + "\n" + ex;
+        }
+      }
+      output += "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n\n";
+    }
+  }
+  catch( ex ) {
+    throw "Error in the structure:\n" + JSON.stringify( structure, null, '  ' ) + "\n" + ex;
+  }
+
+  return output;
+}
+
+
+function getCodeForKeys( structure ) {
+  var output = '';
+  var tableName, fields, fieldName, fieldType;
+  
+  try {
+    for( tableName in structure ) {
+      output += "ALTER TABLE `${PREFIX}" + tableName + "`\n";
+      output += "  ADD PRIMARY KEY (`id`)";
+      for( fieldName in fields ) {
+        fieldType = fields[ fieldName ];
+        if( fieldType.link ) continue;
+        
+        if( typeof fieldType.key === 'string' ) {
+          switch( fieldType.key.toLowerCase() ) {
+          case 'index':
+            output += ",\n  ADD KEY `" + fieldName + "` (`" + fieldName + "`)";
+            break;
+          case 'unique':
+            output += ",\n  ADD UNIQUE KEY `" + fieldName + "` (`" + fieldName + "`)";
+            break;
+          }
+        }
+      }
+      output += ";\n\n";
+    }
+  }
+  catch( ex ) {
+    throw "Error in the structure:\n" + JSON.stringify( structure, null, '  ' ) + "\n" + ex;
+  }
+
+  return output;
 }
