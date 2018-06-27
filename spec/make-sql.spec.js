@@ -9,18 +9,18 @@ describe('Module make-sql', function() {
   function test(name) {
     var xjs = Util.loadJSON( "make-sql/" + name + ".xjs" );
     var definition = ExpandDefinition( xjs );
-    console.log(JSON.stringify( definition, null, '  ' ));
     var output = MakeSql( definition ).trim();
     var expected = Util.loadText( "make-sql/" + name + ".sql" ).trim();
     Util.saveText( "make-sql/" + name + ".got", output );
-    expect( output ).toEqual( expected );
+    if( output !== expected ) {
+      fail("Difference found between make-sql/" + name + ".got and make-sql/" + name + ".sql!");
+    }
   }
 
   it('should produce the table `user` even with an empty data', function() {
     test( "simple" );
   });
   it('should produce special table for composition', function() {
-    debugger;
     test( "composition" );
   });
 });

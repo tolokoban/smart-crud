@@ -12,6 +12,7 @@ module.exports = function( def ) {
   addTableUser( structure );
   output += getCodeForTables( structure );
   output += getCodeForKeys( structure );
+  output += getCodeForLinks( structure );
 
   return output;
 };
@@ -78,7 +79,7 @@ function addTableUser( structure ) {
 function getCodeForTables( structure ) {
   var output = '';
   var tableName, fields, fieldName, fieldType;
-  
+
   try {
     for( tableName in structure ) {
       fields = structure[tableName];
@@ -113,15 +114,16 @@ function getCodeForTables( structure ) {
 function getCodeForKeys( structure ) {
   var output = '';
   var tableName, fields, fieldName, fieldType;
-  
+
   try {
     for( tableName in structure ) {
       output += "ALTER TABLE `${PREFIX}" + tableName + "`\n";
       output += "  ADD PRIMARY KEY (`id`)";
+      fields = structure[tableName];
       for( fieldName in fields ) {
         fieldType = fields[ fieldName ];
         if( fieldType.link ) continue;
-        
+
         if( typeof fieldType.key === 'string' ) {
           switch( fieldType.key.toLowerCase() ) {
           case 'index':
@@ -141,4 +143,36 @@ function getCodeForKeys( structure ) {
   }
 
   return output;
+}
+
+
+function getCodeForLinks( structure ) {
+  var output = '';
+  var tableName, fields, fieldName, fieldType;
+
+  try {
+    for( tableName in structure ) {
+      fields = structure[tableName];
+      for( fieldName in fields ) {
+        fieldType = fields[ fieldName ];
+        if( !fieldType.link ) continue;
+
+        if( typeof structure[fieldType.type] === 'undefined' ) {
+          throw "The field `" + fieldName + "` of class `" + tableName + "` must have another class as type!\n"
+            + "But you set `" + fieldType.type + "`.";
+        }
+
+        output += "DROP TABLE IF EXISTS `${PREFIX}" + tableName + "`;\n";
+        output += "CREATE TABLE `" + tableName + "_" + fieldName + "_" + fieldType.type + "` (\n";
+        output += "  `" + tableName + "_id` INT(11) NOT NULL,\n";
+        output += "  `" + fieldType.type + "_id` INT(11) NOT NULL)\n";
+        output += "ALTER TABLE `" + tableName + "_" + fieldName + "_" + fieldType.type
+          + "` ADD PRIMARY KEY(`" + tableName + "_id`, `" + fieldType.type + "_id`);\n\n";
+      }
+    }
+    return output;
+  }
+  catch( ex ) {
+    throw "Error in the structure:\n" + JSON.stringify( structure, null, '  ' ) + "\n" + ex;
+  }
 }

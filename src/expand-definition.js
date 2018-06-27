@@ -21,6 +21,13 @@ function expandStructure( definition ) {
         type = { type: type };
         fields[name] = type;
       }
+      
+      type.occur = getOccurence( type.type );
+      if( type.occur ) {
+        // Remove last char because it was used to define occurence.
+        type.type = type.type.substr(0, type.type.length - 1 );
+      }
+      
       prefix = name.charAt( 0 );
       if( '@!'.indexOf( prefix ) > -1 ) {
         // Composition.
@@ -30,4 +37,11 @@ function expandStructure( definition ) {
       }
     }
   }
+}
+
+
+function getOccurence( type ) {
+  var lastChar = type.charAt( type.length - 1 );
+  if( "?+*".indexOf( lastChar ) > -1 ) return lastChar;
+  return undefined;
 }
