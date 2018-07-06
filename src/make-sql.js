@@ -12,7 +12,9 @@ module.exports = function( def ) {
   addTableUser( structure );
   output += getCodeForTables( structure );
   output += getCodeForKeys( structure );
-  output += getCodeForLinks( structure );
+  var links = def.links;
+  if( Array.isArray( links ) )
+    output += getCodeForLinks( links, structure );
 
   return output;
 };
@@ -146,8 +148,28 @@ function getCodeForKeys( structure ) {
 }
 
 
-function getCodeForLinks( structure ) {
+function getCodeForLinks( links, structure ) {
   var output = '';
+
+  links.forEach(function (link) {
+    output += getCodeForLink( link, structure );
+  });
+  return output;
+}
+
+function getCodeForLink( linkDef, structure ) {
+  try {
+    var output = '';
+
+    var link = parseLink( link, structure );
+  }
+  catch( ex ) {
+    throw "Unable to create code for link definition: " + JSON.stringify( linkDef ) + "!\n" + ex;
+  }
+}
+
+
+function toto() {
   var tableName, fields, fieldName, fieldType;
 
   try {

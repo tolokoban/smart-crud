@@ -8,6 +8,7 @@ var PermissiveJson = require("toloframework-permissive-json");
 exports.loadText = loadText;
 exports.loadJSON = loadJSON;
 exports.saveText = saveText;
+exports.saveJSON = saveJSON;
 
 
 
@@ -30,5 +31,11 @@ function saveText( filename, content ) {
   var fullPath = Path.join( __dirname, "..", "data", filename );
   Fs.writeFileSync( fullPath, content, { encoding: "utf8" } );
 }
+
+
+function saveJSON( filename, obj ) {
+  saveText( filename, JSON.stringify( obj, null, '  ' ) );
+}
+
 
 
