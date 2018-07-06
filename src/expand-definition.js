@@ -6,10 +6,18 @@
  */
 module.exports = function( def ) {
   try {
-    var output = {};
+    var output = {
+      // To use for temporary variables.
+      $: {
+        linksNames: {}
+      }
+    };
     translateName( output, def );
     translateStructure( output, def );
     translateLinks( output, def );
+
+    // Remove temporary variables.
+    delete output.$;
     return output;
   }
   catch( ex ) {
@@ -28,25 +36,45 @@ function translateLinks( output, def ) {
     throw "`links` must be an array, but we got: " + JS( links ) + "!";
   output.links = [];
   links.forEach(function (linkDef) {
-    output.links.push( parseLink( linkDef, output.structure ) );
+    output.links.push( parseLink( linkDef, output.structure, output.$ ) );
   });
 }
 
 
-function parseLink( linkDef, structure ) {
+function parseLink( linkDef, structure, tempVars ) {
   try {
     if( typeof linkDef !== 'string' )
-      throw "A link definition must be a string!";
+      throw "A link definition must be a string!\n"
+      + "But we got: " + JS( linkDef );
     var pieces = linkDef.split("|");
     if( pieces.length != 2 )
       throw "There can be one and only one '|' in a link definition!";
 
-    return [parseLinkPart( pieces[0], structure ), parseLinkPart( pieces[1], structure )];
+    var nodes = [
+      parseLinkPart( pieces[0], structure ),
+      parseLinkPart( pieces[1], structure )
+    ];
+    var name = makeLinkName( nodes[0].cls, nodes[1].cls, tempVars );
+    return { name: name, nodes: nodes };
   }
   catch( ex ) {
     throw ex + "\nWe were expecting something like: \"!group.students|student.group*\".";
   }
 }
+
+
+function makeLinkName( name1, name2, tempVars ) {
+  var name = name1 < name2 ? name1 + "_" + name2 : name2 + "_" + name1;
+  var index = tempVars.linksNames[name];
+  if( typeof index === 'undefined' ) {
+    tempVars.linksNames[name] = 2;
+    return name;
+  }
+
+  tempVars.linksNames[name]++;
+  return name + "_" + index;
+}
+
 
 /**
  * @return
@@ -66,9 +94,12 @@ function parseLinkPart( item, structure ) {
     var link = {};
     var className = parts[0];
     var attribName = parts[1];
+
     lookForHardLink( className, link );
     lookForOccurences( attribName, link );
     checkIfClassExist( link.cls, structure );
+
+    return link;
   }
   catch( ex ) {
     throw "Unable to parse the folowing node of a link definition: " + JSON.stringify( item ) + "!\n" + ex;
@@ -104,14 +135,16 @@ function lookForOccurences( attName, link ) {
   var occurences = OCCURENCES[lastChar];
   if( typeof occurences === 'undefined' ) {
     occurences = OCCURENCES.default;
+    link.occ = '1';
   }
   else {
     // Remove the trailing char because it was only used to specify occurences.
     attName = attName.substr( 0, lastCharIndex );
+    link.occ = lastChar;
   }
   link.att = camel( attName );
   link.min = occurences.min;
-  link.max = occurences.max;
+  if( typeof occurences.max !== 'undefined' ) link.max = occurences.max;
 }
 
 
@@ -132,7 +165,7 @@ function translateName( output, def ) {
   if( typeof def.name === 'undefined' ) def.name = 'data';
   if( typeof def.name !== 'string' )
     throw "The attribute `name` must be a string, but we got: " + JS( def.name ) + "!";
-  output.name = camel( def.name );
+  output.name = camelCap( def.name );
 }
 
 
@@ -284,7 +317,7 @@ function camel( name ) {
   for( var k = 0; k < name.length; k++ ) {
     c = name.charAt( k );
     if( c >= "a" && c <= "z" ) continue;
-    if( c >= "0" && c <= "9" ) continue;
+    if( k > 0 && c >= "0" && c <= "9" ) continue;
     if( c == '-' || c == '_' ) continue;
     throw JS( name ) + " is not a valid identifier because of the unexpected char "
       + JS( c ) + "!";
@@ -313,6 +346,21 @@ function JS( obj ) {
   return JSON.stringify( obj );
 }
 
+
 function JSPretty( obj ) {
   return JSON.stringify( obj, null, '  ' );
+}
+
+
+function isSpecial( obj, expectedName ) {
+  var type = typeof obj;
+  if( type === 'string' || type !== 'object' || Array.isArray(obj) ) return false;
+  if( !obj ) return false;
+  var name = obj[0];
+
+  if( typeof name !== 'string' ) return false;
+  if( typeof expectedName === 'string' ) {
+    return name.toLowerCase() === expectedName.toLowerCase();
+  }
+  return true;
 }

@@ -1,16 +1,17 @@
-DROP TABLE IF EXISTS `${PREFIX}group`;
-CREATE TABLE `group` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `${PREFIX}student`;
-CREATE TABLE `student` (
+DROP TABLE IF EXISTS `${PREFIX}Group`;
+CREATE TABLE `Group` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(256)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `${PREFIX}user`;
-CREATE TABLE `user` (
+DROP TABLE IF EXISTS `${PREFIX}Student`;
+CREATE TABLE `Student` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(256)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `${PREFIX}User`;
+CREATE TABLE `User` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `login` VARCHAR(256),
   `password` VARCHAR(256),
@@ -21,25 +22,19 @@ CREATE TABLE `user` (
   `data` TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `${PREFIX}group`
+ALTER TABLE `${PREFIX}Group`
   ADD PRIMARY KEY (`id`);
 
-ALTER TABLE `${PREFIX}student`
+ALTER TABLE `${PREFIX}Student`
   ADD PRIMARY KEY (`id`);
 
-ALTER TABLE `${PREFIX}user`
+ALTER TABLE `${PREFIX}User`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `login` (`login`),
   ADD UNIQUE KEY `name` (`name`);
 
-DROP TABLE IF EXISTS `${PREFIX}group`;
-CREATE TABLE `group_students_student` (
-  `group_id` INT(11) NOT NULL,
-  `student_id` INT(11) NOT NULL)
-ALTER TABLE `group_students_student` ADD PRIMARY KEY(`group_id`, `student_id`);
-
-DROP TABLE IF EXISTS `${PREFIX}student`;
-CREATE TABLE `student_group_group` (
-  `student_id` INT(11) NOT NULL,
-  `group_id` INT(11) NOT NULL)
-ALTER TABLE `student_group_group` ADD PRIMARY KEY(`student_id`, `group_id`);
+DROP TABLE IF EXISTS `${PREFIX}Group_Student`;
+CREATE TABLE `Group_Student` (
+  `students` INT(11) NOT NULL,
+  `group` INT(11) NOT NULL)
+ALTER TABLE `Group_Student` ADD PRIMARY KEY(`students`, `group`);

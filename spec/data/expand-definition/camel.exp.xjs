@@ -1,5 +1,5 @@
 {
-  name: data
+  name: Data
   structure: {
     User: {
       login: { type: string256 key: unique sql: VARCHAR(256) }

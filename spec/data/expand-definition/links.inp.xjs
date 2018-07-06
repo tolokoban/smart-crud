@@ -1,0 +1,12 @@
+{
+  structure: {
+    user: { super-hero: boolean }
+    organization: { name: string256 }
+    care-center: { name: string256 }
+  }
+  links: [
+    !organization.care-centers*|care-center.organization
+    care-center.members*|user.care-center*
+    care-center.admin|user.administradted-care-centers*
+  ]
+}

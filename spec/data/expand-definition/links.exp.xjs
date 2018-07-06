@@ -1,0 +1,43 @@
+{
+  name: Data
+  structure: {
+    User: {
+      login: { type: string256 key: unique sql: VARCHAR(256) }
+      password: { type: string256 sql: VARCHAR(256) }
+      name: { type: string256 key: unique sql: VARCHAR(256) }
+      roles: { type: string512 default: "[]" sql: VARCHAR(512) }
+      enabled: { type: boolean sql: TINYINT(1) }
+      creation: { type: datetime sql: CHAR(14) }
+      data: { type: string sql: TEXT }
+      superHero: { type: boolean sql: TINYINT(1) }
+    }
+    Organization: { name: {type: string256 sql: VARCHAR(256)} }
+    CareCenter: { name: {type: string256 sql: VARCHAR(256)} }
+  }
+  links: [
+    // !organization.care-centers*|care-center.organization
+    {
+      name: CareCenter_Organization
+      nodes: [
+        { cls:Organization att:careCenters min:0 hard:true occ:* }
+        { cls:CareCenter att:organization min:1 max:1 occ:"1" }
+      ]
+    }
+    // care-center.members*|user.care-center*
+    {
+      name: CareCenter_User
+      nodes: [
+        { cls:CareCenter att:members min:0 occ:* }
+        { cls:User att:careCenter min:0 occ:* }
+      ]
+    }
+    // care-center.admin|user.administradted-care-centers*
+    {
+      name: CareCenter_User_2
+      nodes: [
+        { cls:CareCenter att:admin min:1 max:1 occ:"1" }
+        { cls:User att:administradtedCareCenters min:0 occ:* }
+      ]
+    }
+  ]
+}

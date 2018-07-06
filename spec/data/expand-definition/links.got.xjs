@@ -1,0 +1,110 @@
+{
+  "name": "Data",
+  "structure": {
+    "User": {
+      "superHero": {
+        "type": "boolean",
+        "sql": "TINYINT(1)"
+      },
+      "login": {
+        "type": "string256",
+        "key": "unique",
+        "sql": "VARCHAR(256)"
+      },
+      "password": {
+        "type": "string256",
+        "sql": "VARCHAR(256)"
+      },
+      "name": {
+        "type": "string256",
+        "key": "unique",
+        "sql": "VARCHAR(256)"
+      },
+      "roles": {
+        "type": "string512",
+        "default": "[]",
+        "sql": "VARCHAR(512)"
+      },
+      "enabled": {
+        "type": "boolean",
+        "sql": "TINYINT(1)"
+      },
+      "creation": {
+        "type": "datetime",
+        "sql": "CHAR(14)"
+      },
+      "data": {
+        "type": "string",
+        "sql": "TEXT"
+      }
+    },
+    "Organization": {
+      "name": {
+        "type": "string256",
+        "sql": "VARCHAR(256)"
+      }
+    },
+    "CareCenter": {
+      "name": {
+        "type": "string256",
+        "sql": "VARCHAR(256)"
+      }
+    }
+  },
+  "links": [
+    {
+      "name": "CareCenter_Organization",
+      "nodes": [
+        {
+          "hard": true,
+          "cls": "Organization",
+          "occ": "*",
+          "att": "careCenters",
+          "min": 0
+        },
+        {
+          "cls": "CareCenter",
+          "occ": "1",
+          "att": "organization",
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "name": "CareCenter_User",
+      "nodes": [
+        {
+          "cls": "CareCenter",
+          "occ": "*",
+          "att": "members",
+          "min": 0
+        },
+        {
+          "cls": "User",
+          "occ": "*",
+          "att": "careCenter",
+          "min": 0
+        }
+      ]
+    },
+    {
+      "name": "CareCenter_User_2",
+      "nodes": [
+        {
+          "cls": "CareCenter",
+          "occ": "1",
+          "att": "admin",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "cls": "User",
+          "occ": "*",
+          "att": "administradtedCareCenters",
+          "min": 0
+        }
+      ]
+    }
+  ]
+}

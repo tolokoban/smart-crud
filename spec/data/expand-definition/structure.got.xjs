@@ -1,5 +1,5 @@
 {
-  "name": "data",
+  "name": "Data",
   "structure": {
     "User": {
       "superhero": {

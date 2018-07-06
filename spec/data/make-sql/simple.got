@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `${PREFIX}user`;
-CREATE TABLE `user` (
+DROP TABLE IF EXISTS `${PREFIX}User`;
+CREATE TABLE `User` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `login` VARCHAR(256),
   `password` VARCHAR(256),
@@ -10,7 +10,7 @@ CREATE TABLE `user` (
   `data` TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `${PREFIX}user`
+ALTER TABLE `${PREFIX}User`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `login` (`login`),
   ADD UNIQUE KEY `name` (`name`);
