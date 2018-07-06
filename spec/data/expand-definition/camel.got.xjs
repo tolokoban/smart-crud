@@ -2,6 +2,10 @@
   "name": "data",
   "structure": {
     "User": {
+      "superHero": {
+        "type": "boolean",
+        "sql": "TINYINT(1)"
+      },
       "login": {
         "type": "string256",
         "key": "unique",
@@ -32,6 +36,18 @@
       "data": {
         "type": "string",
         "sql": "TEXT"
+      }
+    },
+    "Organization": {
+      "name": {
+        "type": "string256",
+        "sql": "VARCHAR(256)"
+      }
+    },
+    "CareCenter": {
+      "name": {
+        "type": "string256",
+        "sql": "VARCHAR(256)"
       }
     }
   }

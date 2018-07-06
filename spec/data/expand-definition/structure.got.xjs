@@ -2,6 +2,10 @@
   "name": "data",
   "structure": {
     "User": {
+      "superhero": {
+        "type": "boolean",
+        "sql": "TINYINT(1)"
+      },
       "login": {
         "type": "string256",
         "key": "unique",

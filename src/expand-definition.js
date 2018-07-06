@@ -140,13 +140,13 @@ function translateName( output, def ) {
  *
  */
 function translateStructure( output, def ) {
-  var structure = def.structure;
-  if( typeof structure === 'undefined' )
+  if( typeof def.structure === 'undefined' )
     throw "Missing mandatory attribute `structure`!";
-  if( typeof structure !== 'object' || Array.isArray( structure ) )
+  if( typeof def.structure !== 'object' || Array.isArray( def.structure ) )
     throw "Attribute `structure` must be an object!";
 
-  prepareStructureUser( output, def );
+  var structure = prepareStructureUser( clone( def.structure ) );
+  output.structure = {};
   var key, val;
   for( key in structure ) {
     val = structure[key];
@@ -160,7 +160,7 @@ function translateStructure( output, def ) {
 function translateStructureClass( output, className, attribs ) {
   try {
     var camelClassName = camelCap(className);
-    output.structure[className] = {};
+    output.structure[camelClassName] = {};
     var attName, attValue;
     for( attName in attribs ) {
       try {
@@ -172,12 +172,11 @@ function translateStructureClass( output, className, attribs ) {
           throw "Attrib's value must be a string or an object, but we got: " + JS( attValue ) + "!";
 
         checkIfThereIsAnInvalidAttribute( attValue );
-        debugger;
         attValue.sql = getSqlType( attValue.type );
-        output.structure[className][attName] = attValue;
+        output.structure[camelClassName][camel(attName)] = attValue;
       }
       catch( ex ) {
-        throw "Error while parsing attribute " + JS( className ) + "!\n" + ex;
+        throw "Error while parsing attribute " + JS( attName ) + "!\n" + ex;
       }
     }
   }
@@ -221,9 +220,7 @@ var USER_DEFAULT = {
   data: { type: "string" }
 };
 
-function prepareStructureUser( output, def ) {
-  output.structure = clone( def.structure );
-  var structure = output.structure;
+function prepareStructureUser( structure ) {
   if( typeof structure.user === 'undefined' ) structure.user = {};
   var user = structure.user;
   var key, val;
@@ -233,6 +230,7 @@ function prepareStructureUser( output, def ) {
     val = clone( USER_DEFAULT[key] );
     user[key] = val;
   }
+  return structure;
 }
 
 var TYPES_MAPPING = {
@@ -277,7 +275,7 @@ function getSqlType( type ) {
 function capitalize( text ) {
   if( typeof text !== 'string' ) return text;
   if( text.length === 0 ) return text;
-  return text.charAt(0).toUpperCase() + text.substr( 1 ).toLowerCase();
+  return text.charAt(0).toUpperCase() + text.substr( 1 );
 }
 
 

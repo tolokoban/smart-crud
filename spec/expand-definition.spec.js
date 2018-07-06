@@ -10,9 +10,11 @@ describe('Module "definition-parser"', function() {
     var expected = Util.loadJSON( "expand-definition/" + filename + ".exp.xjs" );
     var output = ExpandDefinition( input );
     Util.saveJSON( "expand-definition/" + filename + ".got.xjs", output );
-    
+
     expect( output ).toEqual( expected );
   }
 
   it('should expand empty definition', check.bind( null, "empty" ));
+  it('should extend user with a new field', check.bind( null, "structure" ));
+  it('should camelcase names', check.bind( null, "camel" ));
 });

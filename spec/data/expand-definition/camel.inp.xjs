@@ -1,0 +1,7 @@
+{
+  structure: {
+    user: { super-hero: boolean }
+    organization: { name: string256 }
+    care-center: { name: string256 }
+  }
+}

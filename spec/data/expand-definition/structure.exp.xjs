@@ -1,15 +1,15 @@
 {
   name: data
   structure: {
-    user: {
-      login: { type: string256 key: unique }
-      password: { type: string256 }
-      name: { type: string256 key: unique }
-      roles: { type: string512 default: "[]" }
-      enabled: { type: boolean }
-      creation: { type: datetime }
-      data: { type: string }
-      superhero: { type: boolean }
+    User: {
+      login: { type: string256 key: unique, sql: VARCHAR(256) }
+      password: { type: string256, sql: VARCHAR(256) }
+      name: { type: string256 key: unique, sql: VARCHAR(256) }
+      roles: { type: string512 default: "[]", sql: VARCHAR(512) }
+      enabled: { type: boolean, sql: TINYINT(1) }
+      creation: { type: datetime, sql: CHAR(14) }
+      data: { type: string, sql: TEXT }
+      superhero: { type: boolean, sql: TINYINT(1) }
     }
   }
 }
