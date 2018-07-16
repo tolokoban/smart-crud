@@ -30,7 +30,7 @@ module.exports = function( def ) {
  *
  */
 function translateLinks( output, def ) {
-  if( typeof def.links === 'undefined' ) return;
+  if( typeof def.links === 'undefined' ) def.links = [];
   var links = def.links;
   if( !Array.isArray( links ) )
     throw "`links` must be an array, but we got: " + JS( links ) + "!";

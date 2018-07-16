@@ -7,12 +7,8 @@ CREATE TABLE `User` (
   `roles` VARCHAR(512) DEFAULT '[]',
   `enabled` TINYINT(1),
   `creation` CHAR(14),
-  `data` TEXT
+  `data` TEXT,
+  UNIQUE KEY `login` (`login`),
+  UNIQUE KEY `name` (`name`),
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-ALTER TABLE `${PREFIX}User`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `login` (`login`),
-  ADD UNIQUE KEY `name` (`name`);
-
-

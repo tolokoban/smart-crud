@@ -1,0 +1,10 @@
+{
+  name: data-persistence
+  structure: {
+    group: { name: string256 }
+    student: { name: string256 }
+  }
+  links: [
+    !group.students|student.group*
+  ]
+}

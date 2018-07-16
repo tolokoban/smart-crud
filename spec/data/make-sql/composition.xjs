@@ -4,6 +4,6 @@
     student: { name: string256 }
   }
   links: [
-    !group.students|student.group*
+    !group.students*|student.group
   ]
 }
