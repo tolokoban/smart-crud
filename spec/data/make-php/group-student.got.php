@@ -25,9 +25,18 @@ namespace DataPersistence {
     }
 }
 namespace DataPersistence\Group {
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . $DB->table('Group'));
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
     function get( $id ) {
         global $DB;
-        $stm = \DataPersistence\fetch('SELECT * FROM' . $DB->table('Group') . 'WHERE id=?', $id );
+        $row = \DataPersistence\fetch('SELECT * FROM' . $DB->table('Group') . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
@@ -53,11 +62,31 @@ namespace DataPersistence\Group {
             'DELETE FROM' . $DB->table('Group')
           . 'WHERE id=?', $id);
     }
+    function getStudents( $id ) {
+        global $DB;
+        $stm = \DataPersistence\query(
+            'SELECT id FROM' . $DB->table('Student')
+          . 'WHERE `group`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
 }
 namespace DataPersistence\Student {
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . $DB->table('Student'));
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
     function get( $id ) {
         global $DB;
-        $stm = \DataPersistence\fetch('SELECT * FROM' . $DB->table('Student') . 'WHERE id=?', $id );
+        $row = \DataPersistence\fetch('SELECT * FROM' . $DB->table('Student') . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
@@ -83,11 +112,27 @@ namespace DataPersistence\Student {
             'DELETE FROM' . $DB->table('Student')
           . 'WHERE id=?', $id);
     }
+    function getGroup( $id ) {
+        global $DB;
+        $row = \DataPersistence\fetch(
+            'SELECT `group` FROM' . $DB->table('Student')
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
 }
 namespace DataPersistence\User {
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . $DB->table('User'));
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
     function get( $id ) {
         global $DB;
-        $stm = \DataPersistence\fetch('SELECT * FROM' . $DB->table('User') . 'WHERE id=?', $id );
+        $row = \DataPersistence\fetch('SELECT * FROM' . $DB->table('User') . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'login' => $row['login'],
                 'password' => $row['password'],

@@ -12,4 +12,5 @@
       superhero: { type: boolean, sql: TINYINT(1) }
     }
   }
+  links: []
 }

@@ -11,4 +11,5 @@
       data: { type: string, sql: TEXT }
     }
   }
+  links: []
 }

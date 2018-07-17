@@ -100,7 +100,6 @@ function mapSplitIntoSrcAndDst( tableName, link ) {
 
 function mapParentLink( tableName, link ) {
   var output = ",\n  FOREIGN KEY (`" + link.src.att + "`) REFERENCES `" + link.dst.cls + "`(id)";
-  console.info("[make-sql] link=", JSON.stringify(link, null, '  '));
   if( link.dst.hard ) output += " ON DELETE CASCADE";
   return output;
 }

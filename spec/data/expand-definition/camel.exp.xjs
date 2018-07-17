@@ -18,4 +18,5 @@
       name: { type: string256 sql: VARCHAR(256) }
     }
   }
+  links: []
 }
