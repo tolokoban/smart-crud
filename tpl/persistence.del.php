@@ -1,6 +1,4 @@
     function del( $id ) {
         global $DB;
-        {{NAME}}\exec(
-            'DELETE FROM' . $DB->table('{{TABLE}}')
-          . 'WHERE id=?', $id);
+        {{NAME}}\exec( 'DELETE FROM' . {{TABLE}} . 'WHERE id=?', $id );
     }

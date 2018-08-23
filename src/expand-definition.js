@@ -51,14 +51,14 @@ function parseLink( linkDef, structure, tempVars ) {
       throw "There can be one and only one '|' in a link definition!";
 
     var nodes = [
-      parseLinkPart( pieces[0], structure ),
-      parseLinkPart( pieces[1], structure )
+      parseLinkPart( pieces[0].trim(), structure ),
+      parseLinkPart( pieces[1].trim(), structure )
     ];
     var name = makeLinkName( nodes[0].cls, nodes[1].cls, tempVars );
     return { name: name, nodes: nodes };
   }
   catch( ex ) {
-    throw ex + "\nWe were expecting something like: \"!group.students|student.group*\".";
+    throw ex + "\nWe were expecting something like: \"!group.students*|student.group\".";
   }
 }
 

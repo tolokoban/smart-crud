@@ -1,4 +1,17 @@
 <?php
+/**
+ * # Filters
+ * [ fld, equal ]
+ * [ fld, [ in ] ]
+ * [ fld, min, max ]
+ * [ fld%, like ]
+ * [ fld>, lower limit ]
+ * [ fld<, upper limit ]
+ * [ fld>=, min  ]
+ * [ fld<=, max ]
+ * [ fld!, not equal ]
+ * [ fld!, [not in] ]
+ */
 namespace DataPersistence {
     const NOT_FOUND = -1;
     const SQS_ERROR = -9;

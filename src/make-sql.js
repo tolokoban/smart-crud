@@ -1,5 +1,8 @@
 "use strict";
 
+var Template = require("./template");
+
+
 /**
  * @param {object} def - Must be an expanded definition.
  */
@@ -10,12 +13,6 @@ module.exports = function( def ) {
   else structure = JSON.parse( JSON.stringify( def.structure ) );
 
   output += getCodeForTables( def );
-  /*
-    output += getCodeForKeys( structure );
-    var links = def.links;
-    if( Array.isArray( links ) )
-    output += getCodeForLinks( links, structure );
-  */
   return output;
 };
 
@@ -28,8 +25,8 @@ function getCodeForTables( def ) {
   try {
     for( tableName in structure ) {
       fields = structure[tableName];
-      output += "DROP TABLE IF EXISTS `${PREFIX}" + tableName + "`;\n";
-      output += "CREATE TABLE `" + tableName + "` (\n";
+      output += "DROP TABLE IF EXISTS `" + table(tableName) + "`;\n";
+      output += "CREATE TABLE `" + table(tableName) + "` (\n";
       output += "  `id` INT(11) NOT NULL AUTO_INCREMENT";
       for( fieldName in fields ) {
         fieldType = fields[fieldName];
@@ -61,6 +58,7 @@ function getCodeForTables( def ) {
       output += ",\n  PRIMARY KEY (id)";
       output += "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n\n";
     }
+    output += getSqlTail();
   }
   catch( ex ) {
     throw "Error in the structure:\n" + JSON.stringify( structure, null, '  ' ) + "\n" + ex;
@@ -99,7 +97,17 @@ function mapSplitIntoSrcAndDst( tableName, link ) {
 }
 
 function mapParentLink( tableName, link ) {
-  var output = ",\n  FOREIGN KEY (`" + link.src.att + "`) REFERENCES `" + link.dst.cls + "`(id)";
+  var output = ",\n  FOREIGN KEY (`" + link.src.att + "`) REFERENCES `" + table(link.dst.cls) + "`(id)";
   if( link.dst.hard ) output += " ON DELETE CASCADE";
   return output;
+}
+
+
+function getSqlTail() {
+  return Template.file( "tail.sql" ).out;
+}
+
+
+function table( tablename) {
+  return "${PREFIX}" + tablename.charAt(0).toLowerCase() + tablename.substr(1);
 }

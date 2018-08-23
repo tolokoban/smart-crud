@@ -24,6 +24,7 @@ function buildUtilFunctions( def ) {
 
 function buildTable( def, tableName ) {
   var output = `namespace ${def.name}\\${tableName} {\n`;
+  output += buildTableName( def, tableName );
   output += buildTableAll( def, tableName );
   output += buildTableGet( def, tableName );
   output += buildTableAdd( def, tableName );
@@ -34,10 +35,17 @@ function buildTable( def, tableName ) {
 }
 
 
+function buildTableName( def, tableName ) {
+  return "    function name() {\n"
+    + "        global $DB;\n"
+    + `        return ${table(tableName)};\n`
+    + `    }\n`;
+}
+
 function buildTableAll( def, tableName ) {
   return "    function all() {\n"
     + "        global $DB;\n"
-    + `        $stm = \\${def.name}\\query('SELECT id FROM' . $DB->table('${tableName}'));\n`
+    + `        $stm = \\${def.name}\\query('SELECT id FROM' . \\${def.name}\\${tableName}\\name());\n`
     + `        $ids = [];\n`
     + `        while( null != ($row = $stm->fetch()) ) {\n`
     + `            $ids[] = intVal($row[0]);\n`
@@ -49,7 +57,7 @@ function buildTableAll( def, tableName ) {
 function buildTableGet( def, tableName ) {
   var output = "    function get( $id ) {\n"
       + "        global $DB;\n"
-      + `        $row = \\${def.name}\\fetch('SELECT * FROM' . $DB->table('${tableName}') . 'WHERE id=?', $id );\n`
+      + `        $row = \\${def.name}\\fetch('SELECT * FROM' . \\${def.name}\\${tableName}\\name() . 'WHERE id=?', $id );\n`
       + "        return ['id' => intVal($row['id'])";
   var table = def.structure[tableName];
   for( var fieldName in table ) {
@@ -64,8 +72,7 @@ function buildTableAdd( def, tableName ) {
   return "    function add( $fields ) {\n"
     + "        global $DB;\n"
     + `        return \\${def.name}\\exec(\n`
-    + "            'INSERT INTO' . $DB->table('"
-    + tableName + "') . '("
+    + `            'INSERT INTO' . \\${def.name}\\${tableName}\\name() . '(`
     + fields.map(f => "`" + f + "`").join(",")
     + ")'\n"
     + "          . 'VALUES("
@@ -81,7 +88,7 @@ function buildTableUpd( def, tableName ) {
   return "    function upd( $id, $values ) {\n"
     + "        global $DB;\n"
     + `        \\${def.name}\\exec(\n`
-    + `            'UPDATE' . $DB->table('${tableName}')\n`
+    + `            'UPDATE' . \\${def.name}\\${tableName}\\name()\n`
     + "          . 'SET "
     + fields.map((f, i) => (i > 0 ? ',' : '') + '`' + f + '`=?').join(",")
     + " '\n"
@@ -93,7 +100,7 @@ function buildTableUpd( def, tableName ) {
 
 
 function buildTableDel( def, tableName ) {
-  var replacer = { NAME: '\\' + def.name, TABLE: tableName };
+  var replacer = { NAME: '\\' + def.name, TABLE: `\\${def.name}\\${tableName}\\name()` };
   return Template.file( "persistence.del.php", replacer ).out;
 }
 
@@ -104,7 +111,7 @@ function buildTableLnk( def, tableName ) {
     output += `    function get${cap(link.src.att)}( $id ) {\n`
       + `        global $DB;\n`
       + `        $row = \\${def.name}\\fetch(\n`
-      + `            'SELECT \`${link.src.att}\` FROM' . $DB->table('${tableName}')\n`
+      + `            'SELECT \`${link.src.att}\` FROM' . \\${def.name}\\${tableName}\\name()\n`
       + `          . 'WHERE id=?', $id);\n`
       + `        return intVal($row[0]);\n`
       + `    }\n`;
@@ -113,7 +120,7 @@ function buildTableLnk( def, tableName ) {
     output += `    function get${cap(link.src.att)}( $id ) {\n`
       + `        global $DB;\n`
       + `        $stm = \\${def.name}\\query(\n`
-      + `            'SELECT id FROM' . $DB->table('${link.dst.cls}')\n`
+      + `            'SELECT id FROM' . \\${def.name}\\${link.dst.cls}\\name()\n`
       + `          . 'WHERE \`${link.dst.att}\`=?', $id);\n`
       + `        $ids = [];\n`
       + `        while( null != ($row = $stm->fetch()) ) {\n`
@@ -165,4 +172,8 @@ function getLinksMultiple( def, tableName ) {
 
 function cap( text ) {
   return text.charAt(0).toUpperCase() + text.substr( 1 );
+}
+
+function table( tablename) {
+  return "$DB->table('" + tablename.charAt(0).toLowerCase() + tablename.substr(1) + "')";
 }

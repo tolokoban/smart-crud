@@ -19,6 +19,7 @@ describe('Module make-php', function() {
   }
 
   it('should produce PHP code for Group/Student', test.bind( null, "group-student" ));
+  it('should produce PHP code for real example Cameroun', test.bind( null, "cameroun" ));
 });
 
 

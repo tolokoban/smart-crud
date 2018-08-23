@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS `${PREFIX}User`;
-CREATE TABLE `User` (
+CREATE TABLE `${PREFIX}User` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `login` VARCHAR(256),
   `password` VARCHAR(256),
@@ -12,3 +12,7 @@ CREATE TABLE `User` (
   UNIQUE KEY `name` (`name`),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+INSERT INTO `${PREFIX}user` (`id`, `login`, `password`, `name`, `roles`, `enabled`, `creation`, `data`) VALUES
+(1, '${USER}', '${PASSWORD}', 'Administrator', '["USER", "POWER", "ADMIN"]', 1, ${DATE}, '{}');
