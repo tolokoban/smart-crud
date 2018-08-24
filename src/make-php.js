@@ -44,7 +44,6 @@ function buildTableName( def, tableName ) {
 
 function buildTableAll( def, tableName ) {
   return "    function all() {\n"
-    + "        global $DB;\n"
     + `        $stm = \\${def.name}\\query('SELECT id FROM' . \\${def.name}\\${tableName}\\name());\n`
     + `        $ids = [];\n`
     + `        while( null != ($row = $stm->fetch()) ) {\n`
@@ -56,7 +55,6 @@ function buildTableAll( def, tableName ) {
 
 function buildTableGet( def, tableName ) {
   var output = "    function get( $id ) {\n"
-      + "        global $DB;\n"
       + `        $row = \\${def.name}\\fetch('SELECT * FROM' . \\${def.name}\\${tableName}\\name() . 'WHERE id=?', $id );\n`
       + "        return ['id' => intVal($row['id'])";
   var table = def.structure[tableName];
@@ -70,7 +68,6 @@ function buildTableGet( def, tableName ) {
 function buildTableAdd( def, tableName ) {
   var fields = Object.keys( def.structure[tableName] );
   return "    function add( $fields ) {\n"
-    + "        global $DB;\n"
     + `        return \\${def.name}\\exec(\n`
     + `            'INSERT INTO' . \\${def.name}\\${tableName}\\name() . '(`
     + fields.map(f => "`" + f + "`").join(",")
@@ -86,7 +83,6 @@ function buildTableAdd( def, tableName ) {
 function buildTableUpd( def, tableName ) {
   var fields = Object.keys( def.structure[tableName] );
   return "    function upd( $id, $values ) {\n"
-    + "        global $DB;\n"
     + `        \\${def.name}\\exec(\n`
     + `            'UPDATE' . \\${def.name}\\${tableName}\\name()\n`
     + "          . 'SET "
@@ -107,18 +103,17 @@ function buildTableDel( def, tableName ) {
 
 function buildTableLnk( def, tableName ) {
   var output = '';
-  getLinksSingle( def, tableName ).forEach(function (link) {
+  var links = getLinksOfThisTable( def, tableName );
+  getLinksSingle( links ).forEach(function (link) {
     output += `    function get${cap(link.src.att)}( $id ) {\n`
-      + `        global $DB;\n`
       + `        $row = \\${def.name}\\fetch(\n`
       + `            'SELECT \`${link.src.att}\` FROM' . \\${def.name}\\${tableName}\\name()\n`
       + `          . 'WHERE id=?', $id);\n`
       + `        return intVal($row[0]);\n`
       + `    }\n`;
   });
-  getLinksMultiple( def, tableName ).forEach(function (link) {
+  getLinksMultiple( links ).forEach(function (link) {
     output += `    function get${cap(link.src.att)}( $id ) {\n`
-      + `        global $DB;\n`
       + `        $stm = \\${def.name}\\query(\n`
       + `            'SELECT id FROM' . \\${def.name}\\${link.dst.cls}\\name()\n`
       + `          . 'WHERE \`${link.dst.att}\`=?', $id);\n`
@@ -129,21 +124,63 @@ function buildTableLnk( def, tableName ) {
       + `        return $ids;\n`
       + `    }\n`;
   });
-
+  getLinksManyToMany( links ).forEach(function (link) {
+    output += `    function get${cap(link.src.att)}( $id ) {\n`
+      + `        global $DB;\n`
+      + `        $stm = \\${def.name}\\query(\n`
+      + `            'SELECT \`${link.dst.cls}\` FROM' . $DB->table('${link.name}')\n`
+      + `          . 'WHERE \`${link.src.cls}\`=?', $id);\n`
+      + `        $ids = [];\n`
+      + `        while( null != ($row = $stm->fetch()) ) {\n`
+      + `            $ids[] = intVal($row[0]);\n`
+      + `        }\n`
+      + `        return $ids;\n`
+      + `    }\n`;
+    output += `    function link${cap(link.src.att)}( $id, $id${link.dst.cls} ) {\n`
+      + `        global $DB;\n`
+      + `        \\${def.name}\\query(\n`
+      + `            'INSERT INTO' . $DB->table('${link.name}')\n`
+      + `          . '(\`${link.src.cls}\`, \`${link.dst.cls}\`)'\n`
+      + `          . 'VALUES(?,?)', $id, $id${link.dst.cls});\n`
+      + `    }\n`;
+    output += `    function unlink${cap(link.src.att)}( $id, $id${link.dst.cls}=null ) {\n`
+      + `        global $DB;\n`
+      + `        if( $id${link.dst.cls} == null ) {\n`
+      + `          \\${def.name}\\query(\n`
+      + `              'DELETE FROM' . $DB->table('${link.name}')\n`
+      + `            . 'WHERE \`${link.src.cls}\`=?', $id);\n`
+      + `        }\n`
+      + `        else {\n`
+      + `          \\${def.name}\\query(\n`
+      + `              'DELETE FROM' . $DB->table('${link.name}')\n`
+      + `            . 'WHERE \`${link.src.cls}\`=? AND \`${link.dst.cls}\`=?', $id, $id${link.dst.cls});\n`
+      + `        }\n`
+      + `    }\n`;
+  });
   return output;
 }
 
 
-function getLinksSingle( def, tableName ) {
+/**
+ * Return a list of links for this table (`tableName`).
+ * We ensure that in resulting links we always have
+ *   nodes[0].cls === tableName.
+ */
+function getLinksOfThisTable( def, tableName ) {
+  return def.links.map( link => {
+    if( link.nodes[0].cls === tableName ) return link;
+    if( link.nodes[1].cls === tableName ) return {
+      name: link.name,
+      nodes: [link.nodes[1], link.nodes[0]]
+    };
+    return null;
+  }).filter( link => link != null );
+}
+
+function getLinksSingle( tableLinks ) {
   var links = [];
-  def.links.forEach(function (link) {
+  tableLinks.forEach(function (link) {
     var src = link.nodes[0], dst = link.nodes[1];
-    if( dst.cls == tableName ) {
-      var tmp = dst;
-      dst = src;
-      src = tmp;
-    }
-    else if ( src.cls != tableName ) return;
     if( src.max !== 1 ) return;
     links.push({ src: src, dst: dst });
   });
@@ -152,18 +189,26 @@ function getLinksSingle( def, tableName ) {
 }
 
 
-function getLinksMultiple( def, tableName ) {
+function getLinksMultiple( tableLinks ) {
   var links = [];
-  def.links.forEach(function (link) {
+  tableLinks.forEach(function (link) {
     var src = link.nodes[0], dst = link.nodes[1];
-    if( dst.cls == tableName ) {
-      var tmp = dst;
-      dst = src;
-      src = tmp;
-    }
-    else if ( src.cls != tableName ) return;
     if( typeof( src.max ) !== 'undefined' ) return;
+    if( dst.max !== 1 ) return;
     links.push({ src: src, dst: dst });
+  });
+
+  return links;
+}
+
+
+function getLinksManyToMany( tableLinks ) {
+  var links = [];
+  tableLinks.forEach(function (link) {
+    var src = link.nodes[0], dst = link.nodes[1];
+    if( typeof( src.max ) !== 'undefined' ) return;
+    if( typeof( dst.max ) !== 'undefined' ) return;
+    links.push({ src: src, dst: dst, name: link.name });
   });
 
   return links;

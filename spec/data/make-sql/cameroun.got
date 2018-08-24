@@ -31,7 +31,6 @@ CREATE TABLE `${PREFIX}structure` (
   `forms` TEXT,
   `types` TEXT,
   `organization` INT(11),
-  FOREIGN KEY (`organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -39,10 +38,9 @@ DROP TABLE IF EXISTS `${PREFIX}carecenter`;
 CREATE TABLE `${PREFIX}carecenter` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(256),
+  `code` VARCHAR(256),
   `organization` INT(11),
   `structure` INT(11),
-  FOREIGN KEY (`organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE,
-  FOREIGN KEY (`structure`) REFERENCES `${PREFIX}structure`(id),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -59,7 +57,6 @@ CREATE TABLE `${PREFIX}patientField` (
   `key` VARCHAR(256),
   `value` TEXT,
   `patient` INT(11),
-  FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -79,7 +76,6 @@ CREATE TABLE `${PREFIX}admission` (
   `enter` CHAR(14),
   `exit` CHAR(14),
   `patient` INT(11),
-  FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -88,7 +84,6 @@ CREATE TABLE `${PREFIX}consultation` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `date` CHAR(14),
   `admission` INT(11),
-  FOREIGN KEY (`admission`) REFERENCES `${PREFIX}admission`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -98,7 +93,6 @@ CREATE TABLE `${PREFIX}data` (
   `key` VARCHAR(256),
   `value` TEXT,
   `consultation` INT(11),
-  FOREIGN KEY (`consultation`) REFERENCES `${PREFIX}consultation`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -118,7 +112,6 @@ CREATE TABLE `${PREFIX}attachment` (
   `date` CHAR(14),
   `mime` VARCHAR(256),
   `patient` INT(11),
-  FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -129,9 +122,53 @@ CREATE TABLE `${PREFIX}vaccin` (
   `date` CHAR(14),
   `lot` VARCHAR(256),
   `patient` INT(11),
-  FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `${PREFIX}Organization_User` (
+  `User` INT(11) NOT NULL,
+  `Organization` INT(11) NOT NULL,
+  PRIMARY KEY (`User`, `Organization`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `${PREFIX}Organization_User`
+  ADD FOREIGN KEY (`User`) REFERENCES `${PREFIX}user`(id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`Organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE;
+
+CREATE TABLE `${PREFIX}Carecenter_User` (
+  `User` INT(11) NOT NULL,
+  `Carecenter` INT(11) NOT NULL,
+  PRIMARY KEY (`User`, `Carecenter`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `${PREFIX}Carecenter_User`
+  ADD FOREIGN KEY (`User`) REFERENCES `${PREFIX}user`(id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`Carecenter`) REFERENCES `${PREFIX}carecenter`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}structure`
+  ADD FOREIGN KEY (`organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}carecenter`
+  ADD FOREIGN KEY (`organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`structure`) REFERENCES `${PREFIX}structure`(id);
+
+ALTER TABLE `${PREFIX}patientField`
+  ADD FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}admission`
+  ADD FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}consultation`
+  ADD FOREIGN KEY (`admission`) REFERENCES `${PREFIX}admission`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}data`
+  ADD FOREIGN KEY (`consultation`) REFERENCES `${PREFIX}consultation`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}attachment`
+  ADD FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE;
+
+ALTER TABLE `${PREFIX}vaccin`
+  ADD FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE;
 
 
 INSERT INTO `${PREFIX}user` (`id`, `login`, `password`, `name`, `roles`, `enabled`, `creation`, `data`) VALUES

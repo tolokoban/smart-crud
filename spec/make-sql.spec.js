@@ -20,7 +20,7 @@ describe('Module make-sql', function() {
 
   it('should produce the table `user` even with an empty data', test.bind( null, "simple" ));
   it('should produce special table for composition', test.bind( null, "composition" ));
-  it('should produce special table for composition', test.bind( null, "cameroun" ));
+  it('should produce special table for cameroun', test.bind( null, "cameroun" ));
 });
 
 
