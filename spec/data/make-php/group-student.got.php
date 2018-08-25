@@ -19,37 +19,22 @@ namespace DataPersistence {
     function query() {
         global $DB;
         try {
-            $nbArgs = func_num_args();
-            $args = func_get_args();
-            $sql = $args[0];
-            switch( $nbArgs ) {
-                case 1: return $DB->query( $sql );
-                case 2: return $DB->query( $sql, $args[1] );
-                case 3: return $DB->query( $sql, $args[1], $args[2] );
-                case 4: return $DB->query( $sql, $args[1], $args[2], $args[3] );
-                case 5: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4] );
-                case 6: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5] );
-                case 7: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6] );
-                case 8: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7] );
-                case 9: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7], $args[8] );
-                case 10: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7], $args[8], $args[9] );
-                default: throw new \Exception( "Too many args: $nbArgs!" );
-            }
+            return \call_user_func_array( Array($DB, "query"), func_get_args() );
         }
         catch( Exception $ex ) {
             throw new \Exception( $ex->getMessage(), SQS_ERROR );
         }
     }
     function fetch() {
-        $stm = call_user_func_array( query, func_get_args() );
+        $stm = \call_user_func_array( "\\Data\\query", func_get_args() );
         $row = $stm->fetch();
-        if( !$row ) throw new Exception('[DataPersistence] There is no data!', NOT_FOUND);
+        if( !$row ) throw new \Exception('[Data] There is no data!', NOT_FOUND);
         return $row;
     }
     function exec() {
         global $DB;
-        call_user_func_array( query, func_get_args() );
-        return $DB->lastId;
+        \call_user_func_array( "\\Data\\query", func_get_args() );
+        return $DB->lastId();
     }
 }
 namespace DataPersistence\Group {
@@ -77,12 +62,27 @@ namespace DataPersistence\Group {
             $fields['name']);
     }
     function upd( $id, $values ) {
-        \DataPersistence\exec(
-            'UPDATE' . \DataPersistence\Group\name()
-          . 'SET `name`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\DataPersistence\\Group\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \DataPersistence\Group\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\Group\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Group\name() . 'WHERE id=?', $id );
@@ -96,6 +96,12 @@ namespace DataPersistence\Group {
             $ids[] = intVal($row[0]);
         }
         return $ids;
+    }
+    function linkStudents( $idGroup, $idStudent ) {
+        \DataPersistence\query(
+            'UPDATE' . \DataPersistence\Student\name()
+          . 'SET `group`=? '
+          . 'WHERE id=?', $idGroup, $idStudent);
     }
     function getTeachers( $id ) {
         global $DB;
@@ -185,12 +191,27 @@ namespace DataPersistence\Student {
             $fields['name']);
     }
     function upd( $id, $values ) {
-        \DataPersistence\exec(
-            'UPDATE' . \DataPersistence\Student\name()
-          . 'SET `name`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\DataPersistence\\Student\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \DataPersistence\Student\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\Student\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Student\name() . 'WHERE id=?', $id );
@@ -227,12 +248,27 @@ namespace DataPersistence\Teacher {
             $fields['name']);
     }
     function upd( $id, $values ) {
-        \DataPersistence\exec(
-            'UPDATE' . \DataPersistence\Teacher\name()
-          . 'SET `name`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\DataPersistence\\Teacher\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \DataPersistence\Teacher\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\Teacher\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Teacher\name() . 'WHERE id=?', $id );
@@ -337,18 +373,27 @@ namespace DataPersistence\User {
             $fields['data']);
     }
     function upd( $id, $values ) {
-        \DataPersistence\exec(
-            'UPDATE' . \DataPersistence\User\name()
-          . 'SET `login`=?,,`password`=?,,`name`=?,,`roles`=?,,`enabled`=?,,`creation`=?,,`data`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['login'],
-            $values['password'],
-            $values['name'],
-            $values['roles'],
-            $values['enabled'],
-            $values['creation'],
-            $values['data']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['login','password','name','roles','enabled','creation','data'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\DataPersistence\\User\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \DataPersistence\User\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\User\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\User\name() . 'WHERE id=?', $id );

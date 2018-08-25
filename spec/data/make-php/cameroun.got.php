@@ -19,37 +19,22 @@ namespace Data {
     function query() {
         global $DB;
         try {
-            $nbArgs = func_num_args();
-            $args = func_get_args();
-            $sql = $args[0];
-            switch( $nbArgs ) {
-                case 1: return $DB->query( $sql );
-                case 2: return $DB->query( $sql, $args[1] );
-                case 3: return $DB->query( $sql, $args[1], $args[2] );
-                case 4: return $DB->query( $sql, $args[1], $args[2], $args[3] );
-                case 5: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4] );
-                case 6: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5] );
-                case 7: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6] );
-                case 8: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7] );
-                case 9: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7], $args[8] );
-                case 10: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7], $args[8], $args[9] );
-                default: throw new \Exception( "Too many args: $nbArgs!" );
-            }
+            return \call_user_func_array( Array($DB, "query"), func_get_args() );
         }
         catch( Exception $ex ) {
             throw new \Exception( $ex->getMessage(), SQS_ERROR );
         }
     }
     function fetch() {
-        $stm = call_user_func_array( query, func_get_args() );
+        $stm = \call_user_func_array( "\\Data\\query", func_get_args() );
         $row = $stm->fetch();
-        if( !$row ) throw new Exception('[Data] There is no data!', NOT_FOUND);
+        if( !$row ) throw new \Exception('[Data] There is no data!', NOT_FOUND);
         return $row;
     }
     function exec() {
         global $DB;
-        call_user_func_array( query, func_get_args() );
-        return $DB->lastId;
+        \call_user_func_array( "\\Data\\query", func_get_args() );
+        return $DB->lastId();
     }
 }
 namespace Data\User {
@@ -91,19 +76,27 @@ namespace Data\User {
             $fields['data']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\User\name()
-          . 'SET `dashboard`=?,,`login`=?,,`password`=?,,`name`=?,,`roles`=?,,`enabled`=?,,`creation`=?,,`data`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['dashboard'],
-            $values['login'],
-            $values['password'],
-            $values['name'],
-            $values['roles'],
-            $values['enabled'],
-            $values['creation'],
-            $values['data']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['dashboard','login','password','name','roles','enabled','creation','data'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\User\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\User\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\User\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\User\name() . 'WHERE id=?', $id );
@@ -196,12 +189,27 @@ namespace Data\Organization {
             $fields['name']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Organization\name()
-          . 'SET `name`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Organization\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Organization\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Organization\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Organization\name() . 'WHERE id=?', $id );
@@ -216,6 +224,12 @@ namespace Data\Organization {
         }
         return $ids;
     }
+    function linkCarecenters( $idOrganization, $idCarecenter ) {
+        \Data\query(
+            'UPDATE' . \Data\Carecenter\name()
+          . 'SET `organization`=? '
+          . 'WHERE id=?', $idOrganization, $idCarecenter);
+    }
     function getStructures( $id ) {
         $stm = \Data\query(
             'SELECT id FROM' . \Data\Structure\name()
@@ -225,6 +239,12 @@ namespace Data\Organization {
             $ids[] = intVal($row[0]);
         }
         return $ids;
+    }
+    function linkStructures( $idOrganization, $idStructure ) {
+        \Data\query(
+            'UPDATE' . \Data\Structure\name()
+          . 'SET `organization`=? '
+          . 'WHERE id=?', $idOrganization, $idStructure);
     }
     function getAdmins( $id ) {
         global $DB;
@@ -283,12 +303,27 @@ namespace Data\Carecenter {
             $fields['name']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Carecenter\name()
-          . 'SET `name`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Carecenter\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Carecenter\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Carecenter\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Carecenter\name() . 'WHERE id=?', $id );
@@ -372,17 +407,27 @@ namespace Data\Structure {
             $fields['types']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Structure\name()
-          . 'SET `name`=?,,`exams`=?,,`vaccins`=?,,`patient`=?,,`forms`=?,,`types`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name'],
-            $values['exams'],
-            $values['vaccins'],
-            $values['patient'],
-            $values['forms'],
-            $values['types']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name','exams','vaccins','patient','forms','types'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Structure\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Structure\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Structure\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Structure\name() . 'WHERE id=?', $id );
@@ -402,6 +447,12 @@ namespace Data\Structure {
             $ids[] = intVal($row[0]);
         }
         return $ids;
+    }
+    function linkCarecenters( $idStructure, $idCarecenter ) {
+        \Data\query(
+            'UPDATE' . \Data\Carecenter\name()
+          . 'SET `structure`=? '
+          . 'WHERE id=?', $idStructure, $idCarecenter);
     }
 }
 namespace Data\Patient {
@@ -429,12 +480,27 @@ namespace Data\Patient {
             $fields['key']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Patient\name()
-          . 'SET `key`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['key']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['key'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Patient\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Patient\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Patient\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Patient\name() . 'WHERE id=?', $id );
@@ -449,6 +515,12 @@ namespace Data\Patient {
         }
         return $ids;
     }
+    function linkAdmissions( $idPatient, $idAdmission ) {
+        \Data\query(
+            'UPDATE' . \Data\Admission\name()
+          . 'SET `patient`=? '
+          . 'WHERE id=?', $idPatient, $idAdmission);
+    }
     function getAttachments( $id ) {
         $stm = \Data\query(
             'SELECT id FROM' . \Data\Attachment\name()
@@ -459,6 +531,12 @@ namespace Data\Patient {
         }
         return $ids;
     }
+    function linkAttachments( $idPatient, $idAttachment ) {
+        \Data\query(
+            'UPDATE' . \Data\Attachment\name()
+          . 'SET `patient`=? '
+          . 'WHERE id=?', $idPatient, $idAttachment);
+    }
     function getVaccins( $id ) {
         $stm = \Data\query(
             'SELECT id FROM' . \Data\Vaccin\name()
@@ -468,6 +546,12 @@ namespace Data\Patient {
             $ids[] = intVal($row[0]);
         }
         return $ids;
+    }
+    function linkVaccins( $idPatient, $idVaccin ) {
+        \Data\query(
+            'UPDATE' . \Data\Vaccin\name()
+          . 'SET `patient`=? '
+          . 'WHERE id=?', $idPatient, $idVaccin);
     }
 }
 namespace Data\PatientField {
@@ -497,13 +581,27 @@ namespace Data\PatientField {
             $fields['value']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\PatientField\name()
-          . 'SET `key`=?,,`value`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['key'],
-            $values['value']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\PatientField\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\PatientField\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\PatientField\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\PatientField\name() . 'WHERE id=?', $id );
@@ -540,15 +638,27 @@ namespace Data\File {
             $fields['size']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\File\name()
-          . 'SET `name`=?,,`hash`=?,,`mime`=?,,`size`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name'],
-            $values['hash'],
-            $values['mime'],
-            $values['size']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name','hash','mime','size'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\File\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\File\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\File\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\File\name() . 'WHERE id=?', $id );
@@ -581,13 +691,27 @@ namespace Data\Admission {
             $fields['exit']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Admission\name()
-          . 'SET `enter`=?,,`exit`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['enter'],
-            $values['exit']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['enter','exit'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Admission\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Admission\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Admission\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Admission\name() . 'WHERE id=?', $id );
@@ -607,6 +731,12 @@ namespace Data\Admission {
             $ids[] = intVal($row[0]);
         }
         return $ids;
+    }
+    function linkConsultations( $idAdmission, $idConsultation ) {
+        \Data\query(
+            'UPDATE' . \Data\Consultation\name()
+          . 'SET `admission`=? '
+          . 'WHERE id=?', $idAdmission, $idConsultation);
     }
 }
 namespace Data\Consultation {
@@ -634,12 +764,27 @@ namespace Data\Consultation {
             $fields['date']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Consultation\name()
-          . 'SET `date`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['date']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['date'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Consultation\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Consultation\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Consultation\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Consultation\name() . 'WHERE id=?', $id );
@@ -659,6 +804,12 @@ namespace Data\Consultation {
             $ids[] = intVal($row[0]);
         }
         return $ids;
+    }
+    function linkDatas( $idConsultation, $idData ) {
+        \Data\query(
+            'UPDATE' . \Data\Data\name()
+          . 'SET `consultation`=? '
+          . 'WHERE id=?', $idConsultation, $idData);
     }
 }
 namespace Data\Data {
@@ -688,13 +839,27 @@ namespace Data\Data {
             $fields['value']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Data\name()
-          . 'SET `key`=?,,`value`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['key'],
-            $values['value']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Data\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Data\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Data\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Data\name() . 'WHERE id=?', $id );
@@ -733,13 +898,27 @@ namespace Data\Shapshot {
             $fields['value']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Shapshot\name()
-          . 'SET `key`=?,,`value`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['key'],
-            $values['value']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Shapshot\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Shapshot\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Shapshot\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Shapshot\name() . 'WHERE id=?', $id );
@@ -776,15 +955,27 @@ namespace Data\Attachment {
             $fields['mime']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Attachment\name()
-          . 'SET `name`=?,,`desc`=?,,`date`=?,,`mime`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['name'],
-            $values['desc'],
-            $values['date'],
-            $values['mime']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name','desc','date','mime'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Attachment\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Attachment\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Attachment\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Attachment\name() . 'WHERE id=?', $id );
@@ -825,14 +1016,27 @@ namespace Data\Vaccin {
             $fields['lot']);
     }
     function upd( $id, $values ) {
-        \Data\exec(
-            'UPDATE' . \Data\Vaccin\name()
-          . 'SET `key`=?,,`date`=?,,`lot`=? '
-          . 'WHERE id=?',
-            $id,
-            $values['key'],
-            $values['date'],
-            $values['lot']);
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['key','date','lot'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Vaccin\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Vaccin\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Vaccin\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Vaccin\name() . 'WHERE id=?', $id );

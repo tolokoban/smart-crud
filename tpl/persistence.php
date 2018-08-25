@@ -18,7 +18,7 @@ namespace {{NAME}} {
     function query() {
         global $DB;
         try {
-            \call_user_func_array( Array($DB, "query"), func_get_args() );
+            return \call_user_func_array( Array($DB, "query"), func_get_args() );
         }
         catch( Exception $ex ) {
             throw new \Exception( $ex->getMessage(), SQS_ERROR );

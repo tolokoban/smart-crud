@@ -82,16 +82,31 @@ function buildTableAdd( def, tableName ) {
 
 function buildTableUpd( def, tableName ) {
   var fields = Object.keys( def.structure[tableName] );
-  return "    function upd( $id, $values ) {\n"
-    + `        \\${def.name}\\exec(\n`
-    + `            'UPDATE' . \\${def.name}\\${tableName}\\name()\n`
-    + "          . 'SET "
-    + fields.map((f, i) => (i > 0 ? ',' : '') + '`' + f + '`=?').join(",")
-    + " '\n"
-    + "          . 'WHERE id=?',\n"
-    + "            $id"
-    + fields.map(f => `,\n            $values['${f}']`).join('')
-    + ");\n    }\n";
+  var allowedFields = fields.map( f => "'" + f + "'" ).join(",");
+  return `    function upd( $id, $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [${allowedFields}];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \\Exception("[\\\\${def.name}\\\\${tableName}\\\\upd()] Unknown field: $key!");
+                $sets[] = "\`$key\`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \\${def.name}\\${tableName}\\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            \call_user_func_array( "\\Data\\query", $args );
+        }
+        catch( \\Exception $e ) {
+            error_log("Exception in \\\\${def.name}\\\\${tableName}\\\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
+    }
+`;
 }
 
 
@@ -122,6 +137,12 @@ function buildTableLnk( def, tableName ) {
       + `            $ids[] = intVal($row[0]);\n`
       + `        }\n`
       + `        return $ids;\n`
+      + `    }\n`;
+    output += `    function link${cap(link.src.att)}( $id${link.src.cls}, $id${link.dst.cls} ) {\n`
+      + `        \\${def.name}\\query(\n`
+      + `            'UPDATE' . \\${def.name}\\${link.dst.cls}\\name()\n`
+      + `          . 'SET \`${link.dst.att}\`=? '\n`
+      + `          . 'WHERE id=?', $id${link.src.cls}, $id${link.dst.cls});\n`
       + `    }\n`;
   });
   getLinksManyToMany( links ).forEach(function (link) {
