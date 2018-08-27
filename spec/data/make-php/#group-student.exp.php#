@@ -1,0 +1,299 @@
+<?php
+/**
+ * # Filters
+ * [ fld, equal ]
+ * [ fld, [ in ] ]
+ * [ fld, min, max ]
+ * [ fld%, like ]
+ * [ fld>, lower limit ]
+ * [ fld<, upper limit ]
+ * [ fld>=, min  ]
+ * [ fld<=, max ]
+ * [ fld!, not equal ]
+ * [ fld!, [not in] ]
+ */
+namespace DataPersistence {
+    const NOT_FOUND = -1;
+    const SQS_ERROR = -9;
+
+    function query() {
+        global $DB;
+        try {
+            $nbArgs = func_num_args();
+            $args = func_get_args();
+            $sql = $args[0];
+            switch( $nbArgs ) {
+                case 1: return $DB->query( $sql );
+                case 2: return $DB->query( $sql, $args[1] );
+                case 3: return $DB->query( $sql, $args[1], $args[2] );
+                case 4: return $DB->query( $sql, $args[1], $args[2], $args[3] );
+                case 5: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4] );
+                case 6: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5] );
+                case 7: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6] );
+                case 8: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7] );
+                case 9: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7], $args[8] );
+                case 10: return $DB->query( $sql, $args[1], $args[2], $args[3], $args[4], $args[5], $args[6], $args[7], $args[8], $args[9] );
+                default: throw new \Exception( "Too many args: $nbArgs!" );
+            }
+        }
+        catch( Exception $ex ) {
+            throw new \Exception( $ex->getMessage(), SQS_ERROR );
+        }
+    }
+    function fetch() {
+        $stm = call_user_func_array( query, func_get_args() );
+        $row = $stm->fetch();
+        if( !$row ) throw new Exception('[DataPersistence] There is no data!', NOT_FOUND);
+        return $row;
+    }
+    function exec() {
+        global $DB;
+        call_user_func_array( query, func_get_args() );
+        return $DB->lastId;
+    }
+}
+namespace DataPersistence\Group {
+    function name() {
+        global $DB;
+        return $DB->table('group');
+    }
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . \DataPersistence\Group\name());
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function get( $id ) {
+        global $DB;
+        $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\Group\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id']),
+                'name' => $row['name']];
+    }
+    function add( $fields ) {
+        global $DB;
+        return \DataPersistence\exec(
+            'INSERT INTO' . \DataPersistence\Group\name() . '(`name`)'
+          . 'VALUES(?)',
+            $fields['name']);
+    }
+    function upd( $id, $values ) {
+        global $DB;
+        \DataPersistence\exec(
+            'UPDATE' . \DataPersistence\Group\name()
+          . 'SET `name`=? '
+          . 'WHERE id=?',
+            $id,
+            $values['name']);
+    }
+    function del( $id ) {
+        global $DB;
+        \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Group\name() . 'WHERE id=?', $id );
+    }
+    function getStudents( $id ) {
+        global $DB;
+        $stm = \DataPersistence\query(
+            'SELECT id FROM' . \DataPersistence\Student\name()
+          . 'WHERE `group`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function getTeachers( $id ) {
+        global $DB;
+        $stm = \DataPersistence\query(
+            'SELECT id FROM' . \DataPersistence\Teacher\name()
+          . 'WHERE `groups`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function getAssistants( $id ) {
+        global $DB;
+        $stm = \DataPersistence\query(
+            'SELECT id FROM' . \DataPersistence\Teacher\name()
+          . 'WHERE `assistedGroups`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+}
+namespace DataPersistence\Student {
+    function name() {
+        global $DB;
+        return $DB->table('student');
+    }
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . \DataPersistence\Student\name());
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function get( $id ) {
+        global $DB;
+        $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\Student\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id']),
+                'name' => $row['name']];
+    }
+    function add( $fields ) {
+        global $DB;
+        return \DataPersistence\exec(
+            'INSERT INTO' . \DataPersistence\Student\name() . '(`name`)'
+          . 'VALUES(?)',
+            $fields['name']);
+    }
+    function upd( $id, $values ) {
+        global $DB;
+        \DataPersistence\exec(
+            'UPDATE' . \DataPersistence\Student\name()
+          . 'SET `name`=? '
+          . 'WHERE id=?',
+            $id,
+            $values['name']);
+    }
+    function del( $id ) {
+        global $DB;
+        \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Student\name() . 'WHERE id=?', $id );
+    }
+    function getGroup( $id ) {
+        global $DB;
+        $row = \DataPersistence\fetch(
+            'SELECT `group` FROM' . \DataPersistence\Student\name()
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+}
+namespace DataPersistence\Teacher {
+    function name() {
+        global $DB;
+        return $DB->table('teacher');
+    }
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . \DataPersistence\Teacher\name());
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function get( $id ) {
+        global $DB;
+        $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\Teacher\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id']),
+                'name' => $row['name']];
+    }
+    function add( $fields ) {
+        global $DB;
+        return \DataPersistence\exec(
+            'INSERT INTO' . \DataPersistence\Teacher\name() . '(`name`)'
+          . 'VALUES(?)',
+            $fields['name']);
+    }
+    function upd( $id, $values ) {
+        global $DB;
+        \DataPersistence\exec(
+            'UPDATE' . \DataPersistence\Teacher\name()
+          . 'SET `name`=? '
+          . 'WHERE id=?',
+            $id,
+            $values['name']);
+    }
+    function del( $id ) {
+        global $DB;
+        \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Teacher\name() . 'WHERE id=?', $id );
+    }
+    function getGroups( $id ) {
+        global $DB;
+        $stm = \DataPersistence\query(
+            'SELECT id FROM' . \DataPersistence\Group\name()
+          . 'WHERE `teachers`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function getAssistedGroups( $id ) {
+        global $DB;
+        $stm = \DataPersistence\query(
+            'SELECT id FROM' . \DataPersistence\Group\name()
+          . 'WHERE `assistants`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+}
+namespace DataPersistence\User {
+    function name() {
+        global $DB;
+        return $DB->table('user');
+    }
+    function all() {
+        global $DB;
+        $stm = \DataPersistence\query('SELECT id FROM' . \DataPersistence\User\name());
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function get( $id ) {
+        global $DB;
+        $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\User\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id']),
+                'login' => $row['login'],
+                'password' => $row['password'],
+                'name' => $row['name'],
+                'roles' => $row['roles'],
+                'enabled' => $row['enabled'],
+                'creation' => $row['creation'],
+                'data' => $row['data']];
+    }
+    function add( $fields ) {
+        global $DB;
+        return \DataPersistence\exec(
+            'INSERT INTO' . \DataPersistence\User\name() . '(`login`,`password`,`name`,`roles`,`enabled`,`creation`,`data`)'
+          . 'VALUES(?,?,?,?,?,?,?)',
+            $fields['login'],
+            $fields['password'],
+            $fields['name'],
+            $fields['roles'],
+            $fields['enabled'],
+            $fields['creation'],
+            $fields['data']);
+    }
+    function upd( $id, $values ) {
+        global $DB;
+        \DataPersistence\exec(
+            'UPDATE' . \DataPersistence\User\name()
+          . 'SET `login`=?,,`password`=?,,`name`=?,,`roles`=?,,`enabled`=?,,`creation`=?,,`data`=? '
+          . 'WHERE id=?',
+            $id,
+            $values['login'],
+            $values['password'],
+            $values['name'],
+            $values['roles'],
+            $values['enabled'],
+            $values['creation'],
+            $values['data']);
+    }
+    function del( $id ) {
+        global $DB;
+        \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\User\name() . 'WHERE id=?', $id );
+    }
+}
+?>

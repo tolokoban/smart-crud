@@ -2,8 +2,11 @@
   structure: {
     group: { name: string256 }
     student: { name: string256 }
+    teacher: { name: string256 }
   }
   links: [
     !group.students*|student.group
+    teacher.groups*|group.teachers*
+    teacher.assisted-groups*|group.assistants*
   ]
 }

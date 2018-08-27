@@ -4,6 +4,7 @@
       dashboard: string
     }
     organization: { name: string256 }
+    carecenter: { name: string256 }
     structure: {
       name: string256
       exams: string
@@ -12,7 +13,6 @@
       forms: string
       types: string
     }
-    carecenter: { name: string256, code: string256 }
     patient: {
       key: string256
     }
@@ -61,7 +61,6 @@
     "user.carecenters* | carecenter.admins*"
     "!admission.consultations* | consultation.admission"
     "!consultation.datas* | data.consultation"
-    "!patient.fields* | patient-field.patient"
     "!patient.admissions* | admission.patient"
     "!patient.attachments* | attachment.patient"
     "!patient.vaccins* | vaccin.patient"

@@ -18,24 +18,21 @@ namespace {{NAME}} {
     function query() {
         global $DB;
         try {
-            return call_user_func_array( $DB->query, func_get_args() );
+            return \call_user_func_array( Array($DB, "query"), func_get_args() );
         }
         catch( Exception $ex ) {
-            throw new Exception( $ex->getMessage(), SQS_ERROR );
+            throw new \Exception( $ex->getMessage(), SQS_ERROR );
         }
     }
     function fetch() {
-        $stm = call_user_func_array( query, func_get_args() );
+        $stm = \call_user_func_array( "\\Data\\query", func_get_args() );
         $row = $stm->fetch();
-        if( !$row ) throw new Exception('[{{NAME}}] There is no data!', NOT_FOUND);
+        if( !$row ) throw new \Exception('[Data] There is no data!', NOT_FOUND);
         return $row;
     }
     function exec() {
         global $DB;
-        call_user_func_array( query, func_get_args() );
-        return $DB->lastId;
-    }
-    function filter( $criteria, $fields ) {
-        
+        \call_user_func_array( "\\Data\\query", func_get_args() );
+        return $DB->lastId();
     }
 }
