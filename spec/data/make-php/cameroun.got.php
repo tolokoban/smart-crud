@@ -28,7 +28,10 @@ namespace Data {
     function fetch() {
         $stm = \call_user_func_array( "\\Data\\query", func_get_args() );
         $row = $stm->fetch();
-        if( !$row ) throw new \Exception('[Data] There is no data!', NOT_FOUND);
+        if( !$row ) {
+            error_log("[\\Data\\fetch] No data: " . json_encode(func_get_args()));
+            throw new \Exception('[Data] There is no data!', NOT_FOUND);
+        }
         return $row;
     }
     function exec() {
