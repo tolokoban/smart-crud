@@ -36,6 +36,18 @@ namespace Data {
         \call_user_func_array( "\\Data\\query", func_get_args() );
         return $DB->lastId();
     }
+    function begin() {
+        global $DB;
+        $DB->begin();
+    }
+    function commit() {
+        global $DB;
+        $DB->commit();
+    }
+    function rollback() {
+        global $DB;
+        $DB->rollback();
+    }
 }
 namespace Data\User {
     function name() {
@@ -62,18 +74,29 @@ namespace Data\User {
                 'creation' => $row['creation'],
                 'data' => $row['data']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\User\name() . '(`dashboard`,`login`,`password`,`name`,`roles`,`enabled`,`creation`,`data`)'
-          . 'VALUES(?,?,?,?,?,?,?,?)',
-            $fields['dashboard'],
-            $fields['login'],
-            $fields['password'],
-            $fields['name'],
-            $fields['roles'],
-            $fields['enabled'],
-            $fields['creation'],
-            $fields['data']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['dashboard','login','password','name','roles','enabled','creation','data'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\User\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\User\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\User\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -182,11 +205,29 @@ namespace Data\Organization {
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Organization\name() . '(`name`)'
-          . 'VALUES(?)',
-            $fields['name']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Organization\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Organization\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Organization\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -296,11 +337,29 @@ namespace Data\Carecenter {
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Carecenter\name() . '(`name`)'
-          . 'VALUES(?)',
-            $fields['name']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Carecenter\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Carecenter\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Carecenter\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -395,16 +454,29 @@ namespace Data\Structure {
                 'forms' => $row['forms'],
                 'types' => $row['types']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Structure\name() . '(`name`,`exams`,`vaccins`,`patient`,`forms`,`types`)'
-          . 'VALUES(?,?,?,?,?,?)',
-            $fields['name'],
-            $fields['exams'],
-            $fields['vaccins'],
-            $fields['patient'],
-            $fields['forms'],
-            $fields['types']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name','exams','vaccins','patient','forms','types'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Structure\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Structure\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Structure\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -473,11 +545,29 @@ namespace Data\Patient {
         return ['id' => intVal($row['id']),
                 'key' => $row['key']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Patient\name() . '(`key`)'
-          . 'VALUES(?)',
-            $fields['key']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['key'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Patient\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Patient\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Patient\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -573,12 +663,29 @@ namespace Data\PatientField {
                 'key' => $row['key'],
                 'value' => $row['value']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\PatientField\name() . '(`key`,`value`)'
-          . 'VALUES(?,?)',
-            $fields['key'],
-            $fields['value']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\PatientField\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\PatientField\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\PatientField\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -628,14 +735,29 @@ namespace Data\File {
                 'mime' => $row['mime'],
                 'size' => $row['size']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\File\name() . '(`name`,`hash`,`mime`,`size`)'
-          . 'VALUES(?,?,?,?)',
-            $fields['name'],
-            $fields['hash'],
-            $fields['mime'],
-            $fields['size']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name','hash','mime','size'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\File\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\File\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\File\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -683,12 +805,29 @@ namespace Data\Admission {
                 'enter' => $row['enter'],
                 'exit' => $row['exit']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Admission\name() . '(`enter`,`exit`)'
-          . 'VALUES(?,?)',
-            $fields['enter'],
-            $fields['exit']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['enter','exit'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Admission\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Admission\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Admission\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -757,11 +896,29 @@ namespace Data\Consultation {
         return ['id' => intVal($row['id']),
                 'date' => $row['date']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Consultation\name() . '(`date`)'
-          . 'VALUES(?)',
-            $fields['date']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['date'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Consultation\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Consultation\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Consultation\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -831,12 +988,29 @@ namespace Data\Data {
                 'key' => $row['key'],
                 'value' => $row['value']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Data\name() . '(`key`,`value`)'
-          . 'VALUES(?,?)',
-            $fields['key'],
-            $fields['value']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Data\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Data\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Data\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -890,12 +1064,29 @@ namespace Data\Shapshot {
                 'key' => $row['key'],
                 'value' => $row['value']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Shapshot\name() . '(`key`,`value`)'
-          . 'VALUES(?,?)',
-            $fields['key'],
-            $fields['value']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Shapshot\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Shapshot\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Shapshot\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -945,14 +1136,29 @@ namespace Data\Attachment {
                 'date' => $row['date'],
                 'mime' => $row['mime']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Attachment\name() . '(`name`,`desc`,`date`,`mime`)'
-          . 'VALUES(?,?,?,?)',
-            $fields['name'],
-            $fields['desc'],
-            $fields['date'],
-            $fields['mime']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name','desc','date','mime'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Attachment\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Attachment\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Attachment\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -1007,13 +1213,29 @@ namespace Data\Vaccin {
                 'date' => $row['date'],
                 'lot' => $row['lot']];
     }
-    function add( $fields ) {
-        return \Data\exec(
-            'INSERT INTO' . \Data\Vaccin\name() . '(`key`,`date`,`lot`)'
-          . 'VALUES(?,?,?)',
-            $fields['key'],
-            $fields['date'],
-            $fields['lot']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['key','date','lot'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Vaccin\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Vaccin\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Vaccin\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {

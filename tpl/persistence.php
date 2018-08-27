@@ -35,4 +35,16 @@ namespace {{NAME}} {
         \call_user_func_array( "\\Data\\query", func_get_args() );
         return $DB->lastId();
     }
+    function begin() {
+        global $DB;
+        $DB->begin();
+    }
+    function commit() {
+        global $DB;
+        $DB->commit();
+    }
+    function rollback() {
+        global $DB;
+        $DB->rollback();
+    }
 }

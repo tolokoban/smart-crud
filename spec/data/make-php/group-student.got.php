@@ -36,6 +36,18 @@ namespace DataPersistence {
         \call_user_func_array( "\\Data\\query", func_get_args() );
         return $DB->lastId();
     }
+    function begin() {
+        global $DB;
+        $DB->begin();
+    }
+    function commit() {
+        global $DB;
+        $DB->commit();
+    }
+    function rollback() {
+        global $DB;
+        $DB->rollback();
+    }
 }
 namespace DataPersistence\Group {
     function name() {
@@ -55,11 +67,29 @@ namespace DataPersistence\Group {
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
-    function add( $fields ) {
-        return \DataPersistence\exec(
-            'INSERT INTO' . \DataPersistence\Group\name() . '(`name`)'
-          . 'VALUES(?)',
-            $fields['name']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\DataPersistence\\Group\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \DataPersistence\Group\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\Group\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -184,11 +214,29 @@ namespace DataPersistence\Student {
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
-    function add( $fields ) {
-        return \DataPersistence\exec(
-            'INSERT INTO' . \DataPersistence\Student\name() . '(`name`)'
-          . 'VALUES(?)',
-            $fields['name']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\DataPersistence\\Student\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \DataPersistence\Student\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\Student\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -241,11 +289,29 @@ namespace DataPersistence\Teacher {
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
     }
-    function add( $fields ) {
-        return \DataPersistence\exec(
-            'INSERT INTO' . \DataPersistence\Teacher\name() . '(`name`)'
-          . 'VALUES(?)',
-            $fields['name']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\DataPersistence\\Teacher\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \DataPersistence\Teacher\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\Teacher\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {
@@ -360,17 +426,29 @@ namespace DataPersistence\User {
                 'creation' => $row['creation'],
                 'data' => $row['data']];
     }
-    function add( $fields ) {
-        return \DataPersistence\exec(
-            'INSERT INTO' . \DataPersistence\User\name() . '(`login`,`password`,`name`,`roles`,`enabled`,`creation`,`data`)'
-          . 'VALUES(?,?,?,?,?,?,?)',
-            $fields['login'],
-            $fields['password'],
-            $fields['name'],
-            $fields['roles'],
-            $fields['enabled'],
-            $fields['creation'],
-            $fields['data']);
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['login','password','name','roles','enabled','creation','data'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\DataPersistence\\User\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \DataPersistence\User\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            call_user_func_array( "\Data\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\DataPersistence\\User\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
     }
     function upd( $id, $values ) {
         try {

@@ -67,16 +67,32 @@ function buildTableGet( def, tableName ) {
 
 function buildTableAdd( def, tableName ) {
   var fields = Object.keys( def.structure[tableName] );
-  return "    function add( $fields ) {\n"
-    + `        return \\${def.name}\\exec(\n`
-    + `            'INSERT INTO' . \\${def.name}\\${tableName}\\name() . '(`
-    + fields.map(f => "`" + f + "`").join(",")
-    + ")'\n"
-    + "          . 'VALUES("
-    + fields.map(f => "?").join(",")
-    + ")'"
-    + fields.map(f => `,\n            $fields['${f}']`).join('')
-    + ");\n    }\n";
+  var allowedFields = fields.map( f => "'" + f + "'" ).join(",");
+  return `    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = [${allowedFields}];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \\Exception("[\\\\${def.name}\\\\${tableName}\\\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '\`' . $key . '\`';
+            }
+            $args[0] = 'INSERT INTO' . \\${def.name}\\${tableName}\\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            return \call_user_func_array( "\\Data\\exec", $args );
+        }
+        catch( \\Exception $e ) {
+            error_log("Exception in \\\\${def.name}\\\\${tableName}\\\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
+    }
+`;
 }
 
 
