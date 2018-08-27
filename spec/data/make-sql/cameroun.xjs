@@ -1,0 +1,14 @@
+{
+  name: data,
+  structure: {
+    organisation: { name: string256 }
+    carecenter: { name: string256, country: string256, city: string256, address: string }
+    grant: {
+      type: [ADMIN, ORGA, CARECENTER]
+    }
+  }
+  links: [
+    !organisation.carecenters*|carecenter.organisation
+    organisation.admin|user.organisations*
+  ]
+}
