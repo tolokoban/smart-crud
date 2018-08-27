@@ -322,118 +322,6 @@ namespace Data\Organization {
         }
     }
 }
-namespace Data\Carecenter {
-    function name() {
-        global $DB;
-        return $DB->table('carecenter');
-    }
-    function all() {
-        $stm = \Data\query('SELECT id FROM' . \Data\Carecenter\name());
-        $ids = [];
-        while( null != ($row = $stm->fetch()) ) {
-            $ids[] = intVal($row[0]);
-        }
-        return $ids;
-    }
-    function get( $id ) {
-        $row = \Data\fetch('SELECT * FROM' . \Data\Carecenter\name() . 'WHERE id=?', $id );
-        return ['id' => intVal($row['id']),
-                'name' => $row['name']];
-    }
-    function add( $values ) {
-        try {
-            $args = [null];
-            $sets = [];
-            $fields = [];
-            $allowedFields = ['name'];
-            foreach( $values as $key => $val ) {
-                if( !in_array( $key, $allowedFields ) )
-                    throw new \Exception("[\\Data\\Carecenter\\add()] Unknown field: $key!");
-                $sets[] = "?";
-                $args[] = $val;
-                $fields[] = '`' . $key . '`';
-            }
-            $args[0] = 'INSERT INTO' . \Data\Carecenter\name() . '(' . implode(',', $fields) . ')'
-                     . 'VALUES(' . implode(',', $sets) . ')';
-            return call_user_func_array( "\\Data\\exec", $args );
-        }
-        catch( \Exception $e ) {
-            error_log("Exception in \\Data\\Carecenter\\add( " . json_encode($values) . ")!");
-            error_log("   error:  " . $e->getMessage());
-            error_log("   values: " . json_encode( $values ));
-            throw $e;
-        }
-    }
-    function upd( $id, $values ) {
-        try {
-            $args = [null];
-            $sets = [];
-            $fields = ['name'];
-            foreach( $values as $key => $val ) {
-                if( !in_array( $key, $fields ) )
-                    throw new \Exception("[\\Data\\Carecenter\\upd()] Unknown field: $key!");
-                $sets[] = "`$key`=?";
-                $args[] = $val;
-            }
-            $args[0] = 'UPDATE' . \Data\Carecenter\name() . 'SET '
-                     . implode(',', $sets) . ' WHERE id=?';
-            $args[] = $id;
-            call_user_func_array( "\\Data\\query", $args );
-        }
-        catch( \Exception $e ) {
-            error_log("Exception in \\Data\\Carecenter\\upd( $id, values )!");
-            error_log("   error:  " . $e->getMessage());
-            error_log("   values: " . json_encode( $values ));
-            throw $e;
-        }
-    }
-    function del( $id ) {
-        \Data\exec( 'DELETE FROM' . \Data\Carecenter\name() . 'WHERE id=?', $id );
-    }
-    function getOrganization( $id ) {
-        $row = \Data\fetch(
-            'SELECT `organization` FROM' . \Data\Carecenter\name()
-          . 'WHERE id=?', $id);
-        return intVal($row[0]);
-    }
-    function getStructure( $id ) {
-        $row = \Data\fetch(
-            'SELECT `structure` FROM' . \Data\Carecenter\name()
-          . 'WHERE id=?', $id);
-        return intVal($row[0]);
-    }
-    function getAdmins( $id ) {
-        global $DB;
-        $stm = \Data\query(
-            'SELECT `User` FROM' . $DB->table('Carecenter_User')
-          . 'WHERE `Carecenter`=?', $id);
-        $ids = [];
-        while( null != ($row = $stm->fetch()) ) {
-            $ids[] = intVal($row[0]);
-        }
-        return $ids;
-    }
-    function linkAdmins( $id, $idUser ) {
-        global $DB;
-        \Data\query(
-            'INSERT INTO' . $DB->table('Carecenter_User')
-          . '(`Carecenter`, `User`)'
-          . 'VALUES(?,?)', $id, $idUser);
-    }
-    function unlinkAdmins( $id, $idUser=null ) {
-        global $DB;
-        if( $idUser == null ) {
-          \Data\query(
-              'DELETE FROM' . $DB->table('Carecenter_User')
-            . 'WHERE `Carecenter`=?', $id);
-        }
-        else {
-          \Data\query(
-              'DELETE FROM' . $DB->table('Carecenter_User')
-            . 'WHERE `Carecenter`=? AND `User`=?', $id, $idUser);
-        }
-    }
-}
 namespace Data\Structure {
     function name() {
         global $DB;
@@ -530,6 +418,119 @@ namespace Data\Structure {
           . 'WHERE id=?', $idStructure, $idCarecenter);
     }
 }
+namespace Data\Carecenter {
+    function name() {
+        global $DB;
+        return $DB->table('carecenter');
+    }
+    function all() {
+        $stm = \Data\query('SELECT id FROM' . \Data\Carecenter\name());
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function get( $id ) {
+        $row = \Data\fetch('SELECT * FROM' . \Data\Carecenter\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id']),
+                'name' => $row['name'],
+                'code' => $row['code']];
+    }
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['name','code'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\Carecenter\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\Carecenter\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            return call_user_func_array( "\\Data\\exec", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Carecenter\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
+    }
+    function upd( $id, $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['name','code'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\Carecenter\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\Carecenter\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\\Data\\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\Carecenter\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
+    }
+    function del( $id ) {
+        \Data\exec( 'DELETE FROM' . \Data\Carecenter\name() . 'WHERE id=?', $id );
+    }
+    function getOrganization( $id ) {
+        $row = \Data\fetch(
+            'SELECT `organization` FROM' . \Data\Carecenter\name()
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+    function getStructure( $id ) {
+        $row = \Data\fetch(
+            'SELECT `structure` FROM' . \Data\Carecenter\name()
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+    function getAdmins( $id ) {
+        global $DB;
+        $stm = \Data\query(
+            'SELECT `User` FROM' . $DB->table('Carecenter_User')
+          . 'WHERE `Carecenter`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function linkAdmins( $id, $idUser ) {
+        global $DB;
+        \Data\query(
+            'INSERT INTO' . $DB->table('Carecenter_User')
+          . '(`Carecenter`, `User`)'
+          . 'VALUES(?,?)', $id, $idUser);
+    }
+    function unlinkAdmins( $id, $idUser=null ) {
+        global $DB;
+        if( $idUser == null ) {
+          \Data\query(
+              'DELETE FROM' . $DB->table('Carecenter_User')
+            . 'WHERE `Carecenter`=?', $id);
+        }
+        else {
+          \Data\query(
+              'DELETE FROM' . $DB->table('Carecenter_User')
+            . 'WHERE `Carecenter`=? AND `User`=?', $id, $idUser);
+        }
+    }
+}
 namespace Data\Patient {
     function name() {
         global $DB;
@@ -597,6 +598,22 @@ namespace Data\Patient {
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Patient\name() . 'WHERE id=?', $id );
+    }
+    function getFields( $id ) {
+        $stm = \Data\query(
+            'SELECT id FROM' . \Data\PatientField\name()
+          . 'WHERE `patient`=?', $id);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function linkFields( $idPatient, $idPatientField ) {
+        \Data\query(
+            'UPDATE' . \Data\PatientField\name()
+          . 'SET `patient`=? '
+          . 'WHERE id=?', $idPatient, $idPatientField);
     }
     function getAdmissions( $id ) {
         $stm = \Data\query(
@@ -715,6 +732,12 @@ namespace Data\PatientField {
     }
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\PatientField\name() . 'WHERE id=?', $id );
+    }
+    function getPatient( $id ) {
+        $row = \Data\fetch(
+            'SELECT `patient` FROM' . \Data\PatientField\name()
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
     }
 }
 namespace Data\File {
