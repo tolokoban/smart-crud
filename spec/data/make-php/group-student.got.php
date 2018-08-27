@@ -82,7 +82,7 @@ namespace DataPersistence\Group {
             }
             $args[0] = 'INSERT INTO' . \DataPersistence\Group\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\Group\\add( " . json_encode($values) . ")!");
@@ -105,7 +105,7 @@ namespace DataPersistence\Group {
             $args[0] = 'UPDATE' . \DataPersistence\Group\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\Group\\upd( $id, values )!");
@@ -229,7 +229,7 @@ namespace DataPersistence\Student {
             }
             $args[0] = 'INSERT INTO' . \DataPersistence\Student\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\Student\\add( " . json_encode($values) . ")!");
@@ -252,7 +252,7 @@ namespace DataPersistence\Student {
             $args[0] = 'UPDATE' . \DataPersistence\Student\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\Student\\upd( $id, values )!");
@@ -304,7 +304,7 @@ namespace DataPersistence\Teacher {
             }
             $args[0] = 'INSERT INTO' . \DataPersistence\Teacher\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\Teacher\\add( " . json_encode($values) . ")!");
@@ -327,7 +327,7 @@ namespace DataPersistence\Teacher {
             $args[0] = 'UPDATE' . \DataPersistence\Teacher\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\Teacher\\upd( $id, values )!");
@@ -441,7 +441,7 @@ namespace DataPersistence\User {
             }
             $args[0] = 'INSERT INTO' . \DataPersistence\User\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\User\\add( " . json_encode($values) . ")!");
@@ -464,7 +464,7 @@ namespace DataPersistence\User {
             $args[0] = 'UPDATE' . \DataPersistence\User\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\DataPersistence\\User\\upd( $id, values )!");

@@ -83,7 +83,7 @@ function buildTableAdd( def, tableName ) {
             }
             $args[0] = 'INSERT INTO' . \\${def.name}\\${tableName}\\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            return \call_user_func_array( "\\Data\\exec", $args );
+            return \call_user_func_array( "\\\\Data\\\\exec", $args );
         }
         catch( \\Exception $e ) {
             error_log("Exception in \\\\${def.name}\\\\${tableName}\\\\add( " . json_encode($values) . ")!");
@@ -113,7 +113,7 @@ function buildTableUpd( def, tableName ) {
             $args[0] = 'UPDATE' . \\${def.name}\\${tableName}\\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            \call_user_func_array( "\\Data\\query", $args );
+            \call_user_func_array( "\\\\Data\\\\query", $args );
         }
         catch( \\Exception $e ) {
             error_log("Exception in \\\\${def.name}\\\\${tableName}\\\\upd( $id, values )!");

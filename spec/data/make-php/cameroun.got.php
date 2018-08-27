@@ -89,7 +89,7 @@ namespace Data\User {
             }
             $args[0] = 'INSERT INTO' . \Data\User\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\User\\add( " . json_encode($values) . ")!");
@@ -112,7 +112,7 @@ namespace Data\User {
             $args[0] = 'UPDATE' . \Data\User\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\User\\upd( $id, values )!");
@@ -220,7 +220,7 @@ namespace Data\Organization {
             }
             $args[0] = 'INSERT INTO' . \Data\Organization\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Organization\\add( " . json_encode($values) . ")!");
@@ -243,7 +243,7 @@ namespace Data\Organization {
             $args[0] = 'UPDATE' . \Data\Organization\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Organization\\upd( $id, values )!");
@@ -352,7 +352,7 @@ namespace Data\Carecenter {
             }
             $args[0] = 'INSERT INTO' . \Data\Carecenter\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Carecenter\\add( " . json_encode($values) . ")!");
@@ -375,7 +375,7 @@ namespace Data\Carecenter {
             $args[0] = 'UPDATE' . \Data\Carecenter\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Carecenter\\upd( $id, values )!");
@@ -469,7 +469,7 @@ namespace Data\Structure {
             }
             $args[0] = 'INSERT INTO' . \Data\Structure\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Structure\\add( " . json_encode($values) . ")!");
@@ -492,7 +492,7 @@ namespace Data\Structure {
             $args[0] = 'UPDATE' . \Data\Structure\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Structure\\upd( $id, values )!");
@@ -560,7 +560,7 @@ namespace Data\Patient {
             }
             $args[0] = 'INSERT INTO' . \Data\Patient\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Patient\\add( " . json_encode($values) . ")!");
@@ -583,7 +583,7 @@ namespace Data\Patient {
             $args[0] = 'UPDATE' . \Data\Patient\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Patient\\upd( $id, values )!");
@@ -678,7 +678,7 @@ namespace Data\PatientField {
             }
             $args[0] = 'INSERT INTO' . \Data\PatientField\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\PatientField\\add( " . json_encode($values) . ")!");
@@ -701,7 +701,7 @@ namespace Data\PatientField {
             $args[0] = 'UPDATE' . \Data\PatientField\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\PatientField\\upd( $id, values )!");
@@ -750,7 +750,7 @@ namespace Data\File {
             }
             $args[0] = 'INSERT INTO' . \Data\File\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\File\\add( " . json_encode($values) . ")!");
@@ -773,7 +773,7 @@ namespace Data\File {
             $args[0] = 'UPDATE' . \Data\File\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\File\\upd( $id, values )!");
@@ -820,7 +820,7 @@ namespace Data\Admission {
             }
             $args[0] = 'INSERT INTO' . \Data\Admission\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Admission\\add( " . json_encode($values) . ")!");
@@ -843,7 +843,7 @@ namespace Data\Admission {
             $args[0] = 'UPDATE' . \Data\Admission\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Admission\\upd( $id, values )!");
@@ -911,7 +911,7 @@ namespace Data\Consultation {
             }
             $args[0] = 'INSERT INTO' . \Data\Consultation\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Consultation\\add( " . json_encode($values) . ")!");
@@ -934,7 +934,7 @@ namespace Data\Consultation {
             $args[0] = 'UPDATE' . \Data\Consultation\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Consultation\\upd( $id, values )!");
@@ -1003,7 +1003,7 @@ namespace Data\Data {
             }
             $args[0] = 'INSERT INTO' . \Data\Data\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Data\\add( " . json_encode($values) . ")!");
@@ -1026,7 +1026,7 @@ namespace Data\Data {
             $args[0] = 'UPDATE' . \Data\Data\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Data\\upd( $id, values )!");
@@ -1079,7 +1079,7 @@ namespace Data\Shapshot {
             }
             $args[0] = 'INSERT INTO' . \Data\Shapshot\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Shapshot\\add( " . json_encode($values) . ")!");
@@ -1102,7 +1102,7 @@ namespace Data\Shapshot {
             $args[0] = 'UPDATE' . \Data\Shapshot\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Shapshot\\upd( $id, values )!");
@@ -1151,7 +1151,7 @@ namespace Data\Attachment {
             }
             $args[0] = 'INSERT INTO' . \Data\Attachment\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Attachment\\add( " . json_encode($values) . ")!");
@@ -1174,7 +1174,7 @@ namespace Data\Attachment {
             $args[0] = 'UPDATE' . \Data\Attachment\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Attachment\\upd( $id, values )!");
@@ -1228,7 +1228,7 @@ namespace Data\Vaccin {
             }
             $args[0] = 'INSERT INTO' . \Data\Vaccin\name() . '(' . implode(',', $fields) . ')'
                      . 'VALUES(' . implode(',', $sets) . ')';
-            call_user_func_array( "\Data\query", $args );
+            return call_user_func_array( "\\Data\\exec", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Vaccin\\add( " . json_encode($values) . ")!");
@@ -1251,7 +1251,7 @@ namespace Data\Vaccin {
             $args[0] = 'UPDATE' . \Data\Vaccin\name() . 'SET '
                      . implode(',', $sets) . ' WHERE id=?';
             $args[] = $id;
-            call_user_func_array( "\Data\query", $args );
+            call_user_func_array( "\\Data\\query", $args );
         }
         catch( \Exception $e ) {
             error_log("Exception in \\Data\\Vaccin\\upd( $id, values )!");
