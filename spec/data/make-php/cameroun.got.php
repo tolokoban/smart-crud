@@ -354,11 +354,14 @@ namespace Data\Structure {
         return $ids;
     }
     function get( $id ) {
+<<<<<<< HEAD
         if( is_array( $id ) ) {
             $ids = \Data\ensureArrayOfInt( $id );
             return \Data\query(
                 'SELECT * FROM' . \Data\Structure\name() . 'WHERE id IN ' . $ids);
         }
+=======
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         $row = \Data\fetch('SELECT * FROM' . \Data\Structure\name() . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name'],
@@ -421,6 +424,7 @@ namespace Data\Structure {
     function getOrganization( $idStructure ) {
         $row = \Data\fetch(
             'SELECT `organization` FROM' . \Data\Structure\name()
+<<<<<<< HEAD
           . 'WHERE id=?', $idStructure);
         return intVal($row[0]);
     }
@@ -434,6 +438,15 @@ namespace Data\Structure {
         $stm = \Data\query(
             'SELECT id FROM' . \Data\Carecenter\name()
           . 'WHERE `structure`=?', $idStructure);
+=======
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+    function getCarecenters( $id ) {
+        $stm = \Data\query(
+            'SELECT id FROM' . \Data\Carecenter\name()
+          . 'WHERE `structure`=?', $id);
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
@@ -461,11 +474,14 @@ namespace Data\Carecenter {
         return $ids;
     }
     function get( $id ) {
+<<<<<<< HEAD
         if( is_array( $id ) ) {
             $ids = \Data\ensureArrayOfInt( $id );
             return \Data\query(
                 'SELECT * FROM' . \Data\Carecenter\name() . 'WHERE id IN ' . $ids);
         }
+=======
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         $row = \Data\fetch('SELECT * FROM' . \Data\Carecenter\name() . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name'],
@@ -524,6 +540,7 @@ namespace Data\Carecenter {
     function getOrganization( $idCarecenter ) {
         $row = \Data\fetch(
             'SELECT `organization` FROM' . \Data\Carecenter\name()
+<<<<<<< HEAD
           . 'WHERE id=?', $idCarecenter);
         return intVal($row[0]);
     }
@@ -549,12 +566,29 @@ namespace Data\Carecenter {
         $stm = \Data\query(
             'SELECT id FROM' . \Data\Patient\name()
           . 'WHERE `carecenter`=?', $idCarecenter);
+=======
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+    function getStructure( $id ) {
+        $row = \Data\fetch(
+            'SELECT `structure` FROM' . \Data\Carecenter\name()
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+    function getAdmins( $id ) {
+        global $DB;
+        $stm = \Data\query(
+            'SELECT `User` FROM' . $DB->table('Carecenter_User')
+          . 'WHERE `Carecenter`=?', $id);
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
         }
         return $ids;
     }
+<<<<<<< HEAD
     function linkPatients( $idCarecenter, $idPatient ) {
         \Data\query(
             'UPDATE' . \Data\Patient\name()
@@ -580,16 +614,34 @@ namespace Data\Carecenter {
           . 'VALUES(?,?)', $idCarecenter, $idUser);
     }
     function unlinkAdmins( $idCarecenter, $idUser=null ) {
+=======
+    function linkAdmins( $id, $idUser ) {
+        global $DB;
+        \Data\query(
+            'INSERT INTO' . $DB->table('Carecenter_User')
+          . '(`Carecenter`, `User`)'
+          . 'VALUES(?,?)', $id, $idUser);
+    }
+    function unlinkAdmins( $id, $idUser=null ) {
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         global $DB;
         if( $idUser == null ) {
           \Data\query(
               'DELETE FROM' . $DB->table('Carecenter_User')
+<<<<<<< HEAD
             . 'WHERE `Carecenter`=?', $idCarecenter);
+=======
+            . 'WHERE `Carecenter`=?', $id);
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         }
         else {
           \Data\query(
               'DELETE FROM' . $DB->table('Carecenter_User')
+<<<<<<< HEAD
             . 'WHERE `Carecenter`=? AND `User`=?', $idCarecenter, $idUser);
+=======
+            . 'WHERE `Carecenter`=? AND `User`=?', $id, $idUser);
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         }
     }
 }
@@ -667,6 +719,7 @@ namespace Data\Patient {
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\Patient\name() . 'WHERE id=?', $id );
     }
+<<<<<<< HEAD
     function getCarecenter( $idPatient ) {
         $row = \Data\fetch(
             'SELECT `carecenter` FROM' . \Data\Patient\name()
@@ -683,6 +736,12 @@ namespace Data\Patient {
         $stm = \Data\query(
             'SELECT id FROM' . \Data\PatientField\name()
           . 'WHERE `patient`=?', $idPatient);
+=======
+    function getFields( $id ) {
+        $stm = \Data\query(
+            'SELECT id FROM' . \Data\PatientField\name()
+          . 'WHERE `patient`=?', $id);
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
@@ -695,7 +754,11 @@ namespace Data\Patient {
           . 'SET `patient`=? '
           . 'WHERE id=?', $idPatient, $idPatientField);
     }
+<<<<<<< HEAD
     function getAdmissions( $idPatient ) {
+=======
+    function getAdmissions( $id ) {
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
         $stm = \Data\query(
             'SELECT id FROM' . \Data\Admission\name()
           . 'WHERE `patient`=?', $idPatient);
@@ -818,6 +881,7 @@ namespace Data\PatientField {
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\PatientField\name() . 'WHERE id=?', $id );
     }
+<<<<<<< HEAD
     function getPatient( $idPatientField ) {
         $row = \Data\fetch(
             'SELECT `patient` FROM' . \Data\PatientField\name()
@@ -830,6 +894,14 @@ namespace Data\PatientField {
           . 'SET `patient`=? '
           . 'WHERE id=?', $idPatient, $idPatientField);
     }
+=======
+    function getPatient( $id ) {
+        $row = \Data\fetch(
+            'SELECT `patient` FROM' . \Data\PatientField\name()
+          . 'WHERE id=?', $id);
+        return intVal($row[0]);
+    }
+>>>>>>> 2e6596ae88e7a9b8d90495ac01132b31ee2fa22a
 }
 namespace Data\File {
     function name() {
