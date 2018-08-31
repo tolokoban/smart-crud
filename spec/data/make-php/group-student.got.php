@@ -51,6 +51,14 @@ namespace DataPersistence {
         global $DB;
         $DB->rollback();
     }
+    function ensureArrayOfInt( &$arr ) {
+        if( !is_array( $arr ) ) return '()';
+        $values = [];
+        foreach( $arr as $item ) {
+            if( is_numeric( $item ) ) $values[] = intval( $item );
+        }
+        return '(' . implode(',', $values) . ')';
+    }
 }
 namespace DataPersistence\Group {
     function name() {
@@ -66,6 +74,11 @@ namespace DataPersistence\Group {
         return $ids;
     }
     function get( $id ) {
+        if( is_array( $id ) ) {
+            $ids = \DataPersistence\ensureArrayOfInt( $id );
+            return \DataPersistence\query(
+                'SELECT * FROM' . \DataPersistence\Group\name() . 'WHERE id IN ' . $ids);
+        }
         $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\Group\name() . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
@@ -120,10 +133,10 @@ namespace DataPersistence\Group {
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Group\name() . 'WHERE id=?', $id );
     }
-    function getStudents( $id ) {
+    function getStudents( $idGroup ) {
         $stm = \DataPersistence\query(
             'SELECT id FROM' . \DataPersistence\Student\name()
-          . 'WHERE `group`=?', $id);
+          . 'WHERE `group`=?', $idGroup);
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
@@ -136,66 +149,66 @@ namespace DataPersistence\Group {
           . 'SET `group`=? '
           . 'WHERE id=?', $idGroup, $idStudent);
     }
-    function getTeachers( $id ) {
+    function getTeachers( $idGroup ) {
         global $DB;
         $stm = \DataPersistence\query(
             'SELECT `Teacher` FROM' . $DB->table('Group_Teacher')
-          . 'WHERE `Group`=?', $id);
+          . 'WHERE `Group`=?', $idGroup);
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
         }
         return $ids;
     }
-    function linkTeachers( $id, $idTeacher ) {
+    function linkTeachers( $idGroup, $idTeacher ) {
         global $DB;
         \DataPersistence\query(
             'INSERT INTO' . $DB->table('Group_Teacher')
           . '(`Group`, `Teacher`)'
-          . 'VALUES(?,?)', $id, $idTeacher);
+          . 'VALUES(?,?)', $idGroup, $idTeacher);
     }
-    function unlinkTeachers( $id, $idTeacher=null ) {
+    function unlinkTeachers( $idGroup, $idTeacher=null ) {
         global $DB;
         if( $idTeacher == null ) {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher')
-            . 'WHERE `Group`=?', $id);
+            . 'WHERE `Group`=?', $idGroup);
         }
         else {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher')
-            . 'WHERE `Group`=? AND `Teacher`=?', $id, $idTeacher);
+            . 'WHERE `Group`=? AND `Teacher`=?', $idGroup, $idTeacher);
         }
     }
-    function getAssistants( $id ) {
+    function getAssistants( $idGroup ) {
         global $DB;
         $stm = \DataPersistence\query(
             'SELECT `Teacher` FROM' . $DB->table('Group_Teacher_2')
-          . 'WHERE `Group`=?', $id);
+          . 'WHERE `Group`=?', $idGroup);
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
         }
         return $ids;
     }
-    function linkAssistants( $id, $idTeacher ) {
+    function linkAssistants( $idGroup, $idTeacher ) {
         global $DB;
         \DataPersistence\query(
             'INSERT INTO' . $DB->table('Group_Teacher_2')
           . '(`Group`, `Teacher`)'
-          . 'VALUES(?,?)', $id, $idTeacher);
+          . 'VALUES(?,?)', $idGroup, $idTeacher);
     }
-    function unlinkAssistants( $id, $idTeacher=null ) {
+    function unlinkAssistants( $idGroup, $idTeacher=null ) {
         global $DB;
         if( $idTeacher == null ) {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher_2')
-            . 'WHERE `Group`=?', $id);
+            . 'WHERE `Group`=?', $idGroup);
         }
         else {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher_2')
-            . 'WHERE `Group`=? AND `Teacher`=?', $id, $idTeacher);
+            . 'WHERE `Group`=? AND `Teacher`=?', $idGroup, $idTeacher);
         }
     }
 }
@@ -213,6 +226,11 @@ namespace DataPersistence\Student {
         return $ids;
     }
     function get( $id ) {
+        if( is_array( $id ) ) {
+            $ids = \DataPersistence\ensureArrayOfInt( $id );
+            return \DataPersistence\query(
+                'SELECT * FROM' . \DataPersistence\Student\name() . 'WHERE id IN ' . $ids);
+        }
         $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\Student\name() . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
@@ -267,11 +285,17 @@ namespace DataPersistence\Student {
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Student\name() . 'WHERE id=?', $id );
     }
-    function getGroup( $id ) {
+    function getGroup( $idStudent ) {
         $row = \DataPersistence\fetch(
             'SELECT `group` FROM' . \DataPersistence\Student\name()
-          . 'WHERE id=?', $id);
+          . 'WHERE id=?', $idStudent);
         return intVal($row[0]);
+    }
+    function linkGroup( $idStudent, $idGroup ) {
+        \DataPersistence\query(
+            'UPDATE' . \DataPersistence\Student\name()
+          . 'SET `group`=? '
+          . 'WHERE id=?', $idGroup, $idStudent);
     }
 }
 namespace DataPersistence\Teacher {
@@ -288,6 +312,11 @@ namespace DataPersistence\Teacher {
         return $ids;
     }
     function get( $id ) {
+        if( is_array( $id ) ) {
+            $ids = \DataPersistence\ensureArrayOfInt( $id );
+            return \DataPersistence\query(
+                'SELECT * FROM' . \DataPersistence\Teacher\name() . 'WHERE id IN ' . $ids);
+        }
         $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\Teacher\name() . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'name' => $row['name']];
@@ -342,66 +371,66 @@ namespace DataPersistence\Teacher {
     function del( $id ) {
         \DataPersistence\exec( 'DELETE FROM' . \DataPersistence\Teacher\name() . 'WHERE id=?', $id );
     }
-    function getGroups( $id ) {
+    function getGroups( $idTeacher ) {
         global $DB;
         $stm = \DataPersistence\query(
             'SELECT `Group` FROM' . $DB->table('Group_Teacher')
-          . 'WHERE `Teacher`=?', $id);
+          . 'WHERE `Teacher`=?', $idTeacher);
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
         }
         return $ids;
     }
-    function linkGroups( $id, $idGroup ) {
+    function linkGroups( $idTeacher, $idGroup ) {
         global $DB;
         \DataPersistence\query(
             'INSERT INTO' . $DB->table('Group_Teacher')
           . '(`Teacher`, `Group`)'
-          . 'VALUES(?,?)', $id, $idGroup);
+          . 'VALUES(?,?)', $idTeacher, $idGroup);
     }
-    function unlinkGroups( $id, $idGroup=null ) {
+    function unlinkGroups( $idTeacher, $idGroup=null ) {
         global $DB;
         if( $idGroup == null ) {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher')
-            . 'WHERE `Teacher`=?', $id);
+            . 'WHERE `Teacher`=?', $idTeacher);
         }
         else {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher')
-            . 'WHERE `Teacher`=? AND `Group`=?', $id, $idGroup);
+            . 'WHERE `Teacher`=? AND `Group`=?', $idTeacher, $idGroup);
         }
     }
-    function getAssistedGroups( $id ) {
+    function getAssistedGroups( $idTeacher ) {
         global $DB;
         $stm = \DataPersistence\query(
             'SELECT `Group` FROM' . $DB->table('Group_Teacher_2')
-          . 'WHERE `Teacher`=?', $id);
+          . 'WHERE `Teacher`=?', $idTeacher);
         $ids = [];
         while( null != ($row = $stm->fetch()) ) {
             $ids[] = intVal($row[0]);
         }
         return $ids;
     }
-    function linkAssistedGroups( $id, $idGroup ) {
+    function linkAssistedGroups( $idTeacher, $idGroup ) {
         global $DB;
         \DataPersistence\query(
             'INSERT INTO' . $DB->table('Group_Teacher_2')
           . '(`Teacher`, `Group`)'
-          . 'VALUES(?,?)', $id, $idGroup);
+          . 'VALUES(?,?)', $idTeacher, $idGroup);
     }
-    function unlinkAssistedGroups( $id, $idGroup=null ) {
+    function unlinkAssistedGroups( $idTeacher, $idGroup=null ) {
         global $DB;
         if( $idGroup == null ) {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher_2')
-            . 'WHERE `Teacher`=?', $id);
+            . 'WHERE `Teacher`=?', $idTeacher);
         }
         else {
           \DataPersistence\query(
               'DELETE FROM' . $DB->table('Group_Teacher_2')
-            . 'WHERE `Teacher`=? AND `Group`=?', $id, $idGroup);
+            . 'WHERE `Teacher`=? AND `Group`=?', $idTeacher, $idGroup);
         }
     }
 }
@@ -419,6 +448,11 @@ namespace DataPersistence\User {
         return $ids;
     }
     function get( $id ) {
+        if( is_array( $id ) ) {
+            $ids = \DataPersistence\ensureArrayOfInt( $id );
+            return \DataPersistence\query(
+                'SELECT * FROM' . \DataPersistence\User\name() . 'WHERE id IN ' . $ids);
+        }
         $row = \DataPersistence\fetch('SELECT * FROM' . \DataPersistence\User\name() . 'WHERE id=?', $id );
         return ['id' => intVal($row['id']),
                 'login' => $row['login'],

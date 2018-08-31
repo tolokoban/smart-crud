@@ -54,9 +54,14 @@ function buildTableAll( def, tableName ) {
 }
 
 function buildTableGet( def, tableName ) {
-  var output = "    function get( $id ) {\n"
-      + `        $row = \\${def.name}\\fetch('SELECT * FROM' . \\${def.name}\\${tableName}\\name() . 'WHERE id=?', $id );\n`
-      + "        return ['id' => intVal($row['id'])";
+  var output = `    function get( $id ) {
+        if( is_array( $id ) ) {
+            $ids = \\${def.name}\\ensureArrayOfInt( $id );
+            return \\${def.name}\\query(
+                'SELECT * FROM' . \\${def.name}\\${tableName}\\name() . 'WHERE id IN ' . $ids);
+        }
+        $row = \\${def.name}\\fetch('SELECT * FROM' . \\${def.name}\\${tableName}\\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id'])`;
   var table = def.structure[tableName];
   for( var fieldName in table ) {
     output += `,\n                '${fieldName}' => $row['${fieldName}']`;
@@ -136,18 +141,24 @@ function buildTableLnk( def, tableName ) {
   var output = '';
   var links = getLinksOfThisTable( def, tableName );
   getLinksSingle( links ).forEach(function (link) {
-    output += `    function get${cap(link.src.att)}( $id ) {\n`
+    output += `    function get${cap(link.src.att)}( $id${link.src.cls} ) {\n`
       + `        $row = \\${def.name}\\fetch(\n`
       + `            'SELECT \`${link.src.att}\` FROM' . \\${def.name}\\${tableName}\\name()\n`
-      + `          . 'WHERE id=?', $id);\n`
+      + `          . 'WHERE id=?', $id${link.src.cls});\n`
       + `        return intVal($row[0]);\n`
+      + `    }\n`;
+    output += `    function link${cap(link.src.att)}( $id${link.src.cls}, $id${link.dst.cls} ) {\n`
+      + `        \\${def.name}\\query(\n`
+      + `            'UPDATE' . \\${def.name}\\${link.src.cls}\\name()\n`
+      + `          . 'SET \`${link.src.att}\`=? '\n`
+      + `          . 'WHERE id=?', $id${link.dst.cls}, $id${link.src.cls});\n`
       + `    }\n`;
   });
   getLinksMultiple( links ).forEach(function (link) {
-    output += `    function get${cap(link.src.att)}( $id ) {\n`
+    output += `    function get${cap(link.src.att)}( $id${link.src.cls} ) {\n`
       + `        $stm = \\${def.name}\\query(\n`
       + `            'SELECT id FROM' . \\${def.name}\\${link.dst.cls}\\name()\n`
-      + `          . 'WHERE \`${link.dst.att}\`=?', $id);\n`
+      + `          . 'WHERE \`${link.dst.att}\`=?', $id${link.src.cls});\n`
       + `        $ids = [];\n`
       + `        while( null != ($row = $stm->fetch()) ) {\n`
       + `            $ids[] = intVal($row[0]);\n`
@@ -162,35 +173,35 @@ function buildTableLnk( def, tableName ) {
       + `    }\n`;
   });
   getLinksManyToMany( links ).forEach(function (link) {
-    output += `    function get${cap(link.src.att)}( $id ) {\n`
+    output += `    function get${cap(link.src.att)}( $id${link.src.cls} ) {\n`
       + `        global $DB;\n`
       + `        $stm = \\${def.name}\\query(\n`
       + `            'SELECT \`${link.dst.cls}\` FROM' . $DB->table('${link.name}')\n`
-      + `          . 'WHERE \`${link.src.cls}\`=?', $id);\n`
+      + `          . 'WHERE \`${link.src.cls}\`=?', $id${link.src.cls});\n`
       + `        $ids = [];\n`
       + `        while( null != ($row = $stm->fetch()) ) {\n`
       + `            $ids[] = intVal($row[0]);\n`
       + `        }\n`
       + `        return $ids;\n`
       + `    }\n`;
-    output += `    function link${cap(link.src.att)}( $id, $id${link.dst.cls} ) {\n`
+    output += `    function link${cap(link.src.att)}( $id${link.src.cls}, $id${link.dst.cls} ) {\n`
       + `        global $DB;\n`
       + `        \\${def.name}\\query(\n`
       + `            'INSERT INTO' . $DB->table('${link.name}')\n`
       + `          . '(\`${link.src.cls}\`, \`${link.dst.cls}\`)'\n`
-      + `          . 'VALUES(?,?)', $id, $id${link.dst.cls});\n`
+      + `          . 'VALUES(?,?)', $id${link.src.cls}, $id${link.dst.cls});\n`
       + `    }\n`;
-    output += `    function unlink${cap(link.src.att)}( $id, $id${link.dst.cls}=null ) {\n`
+    output += `    function unlink${cap(link.src.att)}( $id${link.src.cls}, $id${link.dst.cls}=null ) {\n`
       + `        global $DB;\n`
       + `        if( $id${link.dst.cls} == null ) {\n`
       + `          \\${def.name}\\query(\n`
       + `              'DELETE FROM' . $DB->table('${link.name}')\n`
-      + `            . 'WHERE \`${link.src.cls}\`=?', $id);\n`
+      + `            . 'WHERE \`${link.src.cls}\`=?', $id${link.src.cls});\n`
       + `        }\n`
       + `        else {\n`
       + `          \\${def.name}\\query(\n`
       + `              'DELETE FROM' . $DB->table('${link.name}')\n`
-      + `            . 'WHERE \`${link.src.cls}\`=? AND \`${link.dst.cls}\`=?', $id, $id${link.dst.cls});\n`
+      + `            . 'WHERE \`${link.src.cls}\`=? AND \`${link.dst.cls}\`=?', $id${link.src.cls}, $id${link.dst.cls});\n`
       + `        }\n`
       + `    }\n`;
   });

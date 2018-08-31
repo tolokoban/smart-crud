@@ -50,4 +50,12 @@ namespace {{NAME}} {
         global $DB;
         $DB->rollback();
     }
+    function ensureArrayOfInt( &$arr ) {
+        if( !is_array( $arr ) ) return '()';
+        $values = [];
+        foreach( $arr as $item ) {
+            if( is_numeric( $item ) ) $values[] = intval( $item );
+        }
+        return '(' . implode(',', $values) . ')';
+    }
 }
