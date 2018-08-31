@@ -75,8 +75,8 @@ CREATE TABLE `${PREFIX}file` (
 DROP TABLE IF EXISTS `${PREFIX}admission`;
 CREATE TABLE `${PREFIX}admission` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `enter` CHAR(14),
-  `exit` CHAR(14),
+  `enter` INT(11),
+  `exit` INT(11),
   `patient` INT(11),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -84,8 +84,8 @@ CREATE TABLE `${PREFIX}admission` (
 DROP TABLE IF EXISTS `${PREFIX}consultation`;
 CREATE TABLE `${PREFIX}consultation` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `enter` CHAR(14),
-  `exit` CHAR(14),
+  `enter` INT(11),
+  `exit` INT(11),
   `admission` INT(11),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -112,7 +112,7 @@ CREATE TABLE `${PREFIX}attachment` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(256),
   `desc` VARCHAR(256),
-  `date` CHAR(14),
+  `date` INT(11),
   `mime` VARCHAR(256),
   `patient` INT(11),
   PRIMARY KEY (id)
@@ -122,7 +122,7 @@ DROP TABLE IF EXISTS `${PREFIX}vaccin`;
 CREATE TABLE `${PREFIX}vaccin` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `key` VARCHAR(256),
-  `date` CHAR(14),
+  `date` INT(11),
   `lot` VARCHAR(256),
   `patient` INT(11),
   PRIMARY KEY (id)

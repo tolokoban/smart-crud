@@ -28,12 +28,12 @@
       size: integer
     }
     admission: {
-      enter: datetime
-      exit: datetime      
+      enter: integer
+      exit: integer      
     }
     consultation: {
-      enter: datetime
-      exit: datetime      
+      enter: integer
+      exit: integer      
     }
     data: {
       key: string256
@@ -46,12 +46,12 @@
     attachment: {
       name: string256
       desc: string256
-      date: datetime
+      date: integer
       mime: string256
     }
     vaccin: {
       key: string256
-      date: datetime
+      date: integer
       lot: string256
     }
   }
