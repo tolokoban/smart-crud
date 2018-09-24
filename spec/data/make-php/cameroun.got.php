@@ -140,6 +140,22 @@ namespace Data\User {
     function del( $id ) {
         \Data\exec( 'DELETE FROM' . \Data\User\name() . 'WHERE id=?', $id );
     }
+    function getPreferences( $idUser ) {
+        $stm = \Data\query(
+            'SELECT id FROM' . \Data\UserPref\name()
+          . 'WHERE `user`=?', $idUser);
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function linkPreferences( $idUser, $idUserPref ) {
+        \Data\query(
+            'UPDATE' . \Data\UserPref\name()
+          . 'SET `user`=? '
+          . 'WHERE id=?', $idUser, $idUserPref);
+    }
     function getOrganizations( $idUser ) {
         global $DB;
         $stm = \Data\query(
@@ -201,6 +217,93 @@ namespace Data\User {
               'DELETE FROM' . $DB->table('Carecenter_User')
             . 'WHERE `User`=? AND `Carecenter`=?', $idUser, $idCarecenter);
         }
+    }
+}
+namespace Data\UserPref {
+    function name() {
+        global $DB;
+        return $DB->table('userPref');
+    }
+    function all() {
+        $stm = \Data\query('SELECT id FROM' . \Data\UserPref\name());
+        $ids = [];
+        while( null != ($row = $stm->fetch()) ) {
+            $ids[] = intVal($row[0]);
+        }
+        return $ids;
+    }
+    function get( $id ) {
+        if( is_array( $id ) ) {
+            $ids = \Data\ensureArrayOfInt( $id );
+            return \Data\query(
+                'SELECT * FROM' . \Data\UserPref\name() . 'WHERE id IN ' . $ids);
+        }
+        $row = \Data\fetch('SELECT * FROM' . \Data\UserPref\name() . 'WHERE id=?', $id );
+        return ['id' => intVal($row['id']),
+                'key' => $row['key'],
+                'value' => $row['value']];
+    }
+    function add( $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = [];
+            $allowedFields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $allowedFields ) )
+                    throw new \Exception("[\\Data\\UserPref\\add()] Unknown field: $key!");
+                $sets[] = "?";
+                $args[] = $val;
+                $fields[] = '`' . $key . '`';
+            }
+            $args[0] = 'INSERT INTO' . \Data\UserPref\name() . '(' . implode(',', $fields) . ')'
+                     . 'VALUES(' . implode(',', $sets) . ')';
+            return call_user_func_array( "\\Data\\exec", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\UserPref\\add( " . json_encode($values) . ")!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
+    }
+    function upd( $id, $values ) {
+        try {
+            $args = [null];
+            $sets = [];
+            $fields = ['key','value'];
+            foreach( $values as $key => $val ) {
+                if( !in_array( $key, $fields ) )
+                    throw new \Exception("[\\Data\\UserPref\\upd()] Unknown field: $key!");
+                $sets[] = "`$key`=?";
+                $args[] = $val;
+            }
+            $args[0] = 'UPDATE' . \Data\UserPref\name() . 'SET '
+                     . implode(',', $sets) . ' WHERE id=?';
+            $args[] = $id;
+            call_user_func_array( "\\Data\\query", $args );
+        }
+        catch( \Exception $e ) {
+            error_log("Exception in \\Data\\UserPref\\upd( $id, values )!");
+            error_log("   error:  " . $e->getMessage());
+            error_log("   values: " . json_encode( $values ));
+            throw $e;
+        }
+    }
+    function del( $id ) {
+        \Data\exec( 'DELETE FROM' . \Data\UserPref\name() . 'WHERE id=?', $id );
+    }
+    function getUser( $idUserPref ) {
+        $row = \Data\fetch(
+            'SELECT `user` FROM' . \Data\UserPref\name()
+          . 'WHERE id=?', $idUserPref);
+        return intVal($row[0]);
+    }
+    function linkUser( $idUserPref, $idUser ) {
+        \Data\query(
+            'UPDATE' . \Data\UserPref\name()
+          . 'SET `user`=? '
+          . 'WHERE id=?', $idUser, $idUserPref);
     }
 }
 namespace Data\Organization {

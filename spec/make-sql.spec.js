@@ -14,7 +14,9 @@ describe('Module make-sql', function() {
     Util.saveText( "make-sql/" + name + ".got", output );
     if( output !== expected ) {
       fail("Difference found between make-sql/" + name + ".got and make-sql/" + name + ".sql!\n"
-           + findDiff( expected, output ));
+           + findDiff( expected, output )
+           + "If this is normal, please execute the following command:\n"
+          + `cp spec/data/make-sql/${name}.got spec/data/make-sql/${name}.sql`);
     }
   }
 

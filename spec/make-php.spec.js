@@ -14,7 +14,9 @@ describe('Module make-php', function() {
     Util.saveText( "make-php/" + name + ".got.php", output );
     if( output !== expected ) {
       fail("Difference found between make-php/" + name + ".got.php and make-php/" + name + ".exp.php!\n"
-           + findDiff( expected, output ));
+           + findDiff( expected, output )
+           + "If this is normal, please execute the following command:\n"
+           + `cp spec/data/make-php/${name}.got.php spec/data/make-php/${name}.exp.php`);
     }
   }
 

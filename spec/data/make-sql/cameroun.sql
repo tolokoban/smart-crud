@@ -14,6 +14,15 @@ CREATE TABLE `${PREFIX}user` (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `${PREFIX}userPref`;
+CREATE TABLE `${PREFIX}userPref` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `key` VARCHAR(32),
+  `value` TEXT,
+  `user` INT(11),
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `${PREFIX}organization`;
 CREATE TABLE `${PREFIX}organization` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -48,6 +57,8 @@ DROP TABLE IF EXISTS `${PREFIX}patient`;
 CREATE TABLE `${PREFIX}patient` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `key` VARCHAR(256),
+  `edited` INT(11),
+  `carecenter` INT(11),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -73,8 +84,8 @@ CREATE TABLE `${PREFIX}file` (
 DROP TABLE IF EXISTS `${PREFIX}admission`;
 CREATE TABLE `${PREFIX}admission` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `enter` CHAR(14),
-  `exit` CHAR(14),
+  `enter` INT(11),
+  `exit` INT(11),
   `patient` INT(11),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -82,7 +93,8 @@ CREATE TABLE `${PREFIX}admission` (
 DROP TABLE IF EXISTS `${PREFIX}consultation`;
 CREATE TABLE `${PREFIX}consultation` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `date` CHAR(14),
+  `enter` INT(11),
+  `exit` INT(11),
   `admission` INT(11),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -109,7 +121,7 @@ CREATE TABLE `${PREFIX}attachment` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(256),
   `desc` VARCHAR(256),
-  `date` CHAR(14),
+  `date` INT(11),
   `mime` VARCHAR(256),
   `patient` INT(11),
   PRIMARY KEY (id)
@@ -119,7 +131,7 @@ DROP TABLE IF EXISTS `${PREFIX}vaccin`;
 CREATE TABLE `${PREFIX}vaccin` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `key` VARCHAR(256),
-  `date` CHAR(14),
+  `date` INT(11),
   `lot` VARCHAR(256),
   `patient` INT(11),
   PRIMARY KEY (id)
@@ -145,12 +157,18 @@ ALTER TABLE `${PREFIX}Carecenter_User`
   ADD FOREIGN KEY (`User`) REFERENCES `${PREFIX}user`(id) ON DELETE CASCADE,
   ADD FOREIGN KEY (`Carecenter`) REFERENCES `${PREFIX}carecenter`(id) ON DELETE CASCADE;
 
+ALTER TABLE `${PREFIX}userPref`
+  ADD FOREIGN KEY (`user`) REFERENCES `${PREFIX}user`(id) ON DELETE CASCADE;
+
 ALTER TABLE `${PREFIX}structure`
   ADD FOREIGN KEY (`organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE;
 
 ALTER TABLE `${PREFIX}carecenter`
   ADD FOREIGN KEY (`organization`) REFERENCES `${PREFIX}organization`(id) ON DELETE CASCADE,
   ADD FOREIGN KEY (`structure`) REFERENCES `${PREFIX}structure`(id);
+
+ALTER TABLE `${PREFIX}patient`
+  ADD FOREIGN KEY (`carecenter`) REFERENCES `${PREFIX}carecenter`(id) ON DELETE CASCADE;
 
 ALTER TABLE `${PREFIX}patientField`
   ADD FOREIGN KEY (`patient`) REFERENCES `${PREFIX}patient`(id) ON DELETE CASCADE;
