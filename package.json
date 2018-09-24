@@ -1,6 +1,6 @@
 {
     "name": "smart-crud",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Javascript (and eventually PHP) code generator for CRUD applications.",
     "main": "index.js",
     "scripts": {
